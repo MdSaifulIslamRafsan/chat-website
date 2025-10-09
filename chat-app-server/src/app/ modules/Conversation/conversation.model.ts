@@ -27,7 +27,23 @@ const conversationSchema = new mongoose.Schema<TConversation>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
+
   { timestamps: true }
 );
+
+// Query Middleware
+conversationSchema.pre("find", function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+conversationSchema.pre("aggregate", function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  next();
+});
 export const Conversation = mongoose.model("Conversation", conversationSchema);

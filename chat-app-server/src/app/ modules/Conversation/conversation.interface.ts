@@ -5,5 +5,6 @@ export interface TConversation {
   isGroup: boolean;
   participants: Types.ObjectId[];
   groupAdmin?: Types.ObjectId[];
-  lastMessage?:  Types.ObjectId;
+  isDeleted: boolean;
+  lastMessage?: Types.ObjectId;
 }
