@@ -3,7 +3,7 @@ import { TUser } from "./user.interface";
 import { User } from "./user.model";
 import AppError from "../../errors/AppError";
 
-const createStudentIntoDB = async (data: TUser) => {
+const createUserIntoDB = async (data: TUser) => {
   const isExistUser = await User.findOne({ email: data?.email });
 
   if (isExistUser) {
@@ -15,5 +15,5 @@ const createStudentIntoDB = async (data: TUser) => {
 };
 
 export const userService = {
-  createStudentIntoDB,
+  createUserIntoDB,
 };

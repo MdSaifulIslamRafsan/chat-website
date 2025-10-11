@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 export interface TConversation {
-  name: string;
+  groupName: string;
   isGroup: boolean;
   participants: Types.ObjectId[];
   groupAdmin?: Types.ObjectId[];

@@ -3,7 +3,7 @@ import { TConversation } from "./conversation.interface";
 
 const conversationSchema = new mongoose.Schema<TConversation>(
   {
-    name: {
+    groupName: {
       type: String,
       trim: true,
     },
