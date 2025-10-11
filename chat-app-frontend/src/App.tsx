@@ -1,21 +1,35 @@
-import { Moon, Sun } from "lucide-react";
-import { Button } from "./components/ui/button";
-import { useTheme } from "./utils/useTheme";
+import { useState, useEffect } from "react";
+import { socket } from "./utils/socket";
 
-const App = () => {
-  const { theme, setTheme } = useTheme();
+export default function App() {
+  const [isConnected, setIsConnected] = useState(socket.connected);
 
-  return (
-    <Button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      variant="outline"
-      size="icon"
-      className="relative"
-    >
-      <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-      <span className="sr-only">Toggle theme</span>
-    </Button>
-  );
-};
-export default App;
+  // const [fooEvents, setFooEvents] = useState([]);
+
+  useEffect(() => {
+    function onConnect() {
+      setIsConnected(true);
+    }
+
+    function onDisconnect() {
+      setIsConnected(false);
+    }
+
+    // function onFooEvent(value) {
+    //   setFooEvents((previous) => [...previous, value]);
+    // }
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    // socket.on("foo", onFooEvent);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      // socket.off("foo", onFooEvent);
+    };
+  }, []);
+  console.log(socket);
+
+  return <div className="App"> {isConnected ? "Connected" : "offline"}</div>;
+}
