@@ -3,6 +3,7 @@
 
 import { Outlet } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
+import { useAppSelector } from "./redux/hooks";
 
 // export default function App() {
 //   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -40,13 +41,23 @@ import Sidebar from "./components/Sidebar";
 // }
 
 const App = () => {
+  const { showSidebar } = useAppSelector((state) => state.layout);
+
   return (
     <div className="p-5">
-      <div className="container flex gap-10 border-2 border-border rounded-2xl  mx-auto">
-        <div className="w-full max-w-sm">
+      <div className="container flex border-2 border-border rounded-2xl  mx-auto">
+        <div
+          className={`w-full md:max-w-xs lg:max-w-sm transition-all duration-300 ${
+            showSidebar ? "block" : "hidden md:block"
+          }`}
+        >
           <Sidebar></Sidebar>
         </div>
-        <div className="flex-1">
+        <div
+          className={`flex-1 transition-all duration-300 ${
+            showSidebar ? "hidden md:flex" : "flex"
+          }`}
+        >
           <Outlet></Outlet>
         </div>
       </div>

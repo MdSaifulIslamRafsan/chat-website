@@ -1,14 +1,23 @@
 import { useTheme } from "../utils/useTheme";
 import { Button } from "./ui/button";
 import { Moon, Sun } from "lucide-react";
+import { X } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { cn } from "../lib/utils";
 import { Badge } from "./ui/badge";
 import { Link } from "react-router-dom";
+import { showOnlyChat } from "../redux/features/layoutSlice";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 
 const Sidebar = () => {
   const { theme, setTheme } = useTheme();
+  const dispatch = useAppDispatch();
+  const { showSidebar } = useAppSelector((state) => state.layout);
+
+  const handleUserClick = () => {
+    dispatch(showOnlyChat());
+  };
 
   const Users = [
     {
@@ -83,24 +92,36 @@ const Sidebar = () => {
       {/* Header */}
       <div className="p-5 border-b border-border flex justify-between items-center">
         <h5 className="font-bold text-lg">Chats</h5>
-        <Button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          variant="outline"
-          size="icon"
-        >
-          <Sun className="h-[1.2rem] w-[1.2rem] dark:hidden" />
-          <Moon className="h-[1.2rem] w-[1.2rem] hidden dark:block" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            variant="outline"
+            size="icon"
+          >
+            <Sun className="h-[1.2rem] w-[1.2rem] dark:hidden" />
+            <Moon className="h-[1.2rem] w-[1.2rem] hidden dark:block" />
+          </Button>
+          {showSidebar && (
+            <Link to={currentUserId}>
+              {" "}
+              <X
+                onClick={() => dispatch(showOnlyChat())}
+                className="md:hidden cursor-pointer"
+              />
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Conversations List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {conversations.map((conv) => {
-    
           if (conv.isGroup) {
             return (
-              <Link to={conv._id}
+              <Link
+                to={conv._id}
                 key={conv._id}
+                onClick={() => handleUserClick()}
                 className="flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted transition"
               >
                 <div className="flex gap-3 items-center">
@@ -132,8 +153,10 @@ const Sidebar = () => {
           if (!otherUser) return null;
 
           return (
-            <Link to={conv._id}
+            <Link
+              to={conv._id}
               key={conv._id}
+              onClick={() => handleUserClick()}
               className="flex justify-between items-center gap-3 p-3 rounded-xl hover:bg-muted transition"
             >
               <div className="flex items-center gap-3">
