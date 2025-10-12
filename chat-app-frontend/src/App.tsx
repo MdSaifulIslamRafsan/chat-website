@@ -1,35 +1,57 @@
-import { useState, useEffect } from "react";
-import { socket } from "./utils/socket";
+// import { useState, useEffect } from "react";
+// import { socket } from "./utils/socket";
 
-export default function App() {
-  const [isConnected, setIsConnected] = useState(socket.connected);
+import { Outlet } from "react-router-dom";
+import Sidebar from "./components/Sidebar";
 
-  // const [fooEvents, setFooEvents] = useState([]);
+// export default function App() {
+//   const [isConnected, setIsConnected] = useState(socket.connected);
 
-  useEffect(() => {
-    function onConnect() {
-      setIsConnected(true);
-    }
+//   // const [fooEvents, setFooEvents] = useState([]);
 
-    function onDisconnect() {
-      setIsConnected(false);
-    }
+//   useEffect(() => {
+//     function onConnect() {
+//       socket.emit("userId", "68e79eb73b03ba34cb09fe51");
+//       setIsConnected(true);
+//     }
 
-    // function onFooEvent(value) {
-    //   setFooEvents((previous) => [...previous, value]);
-    // }
+//     function onDisconnect() {
+//       socket.emit("userId", "68e79eb73b03ba34cb09fe51");
+//       setIsConnected(false);
+//     }
 
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    // socket.on("foo", onFooEvent);
+//     // function onFooEvent(value) {
+//     //   setFooEvents((previous) => [...previous, value]);
+//     // }
 
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-      // socket.off("foo", onFooEvent);
-    };
-  }, []);
-  console.log(socket);
+//     socket.on("connect", onConnect);
+//     socket.on("disconnect", onDisconnect);
+//     // socket.on("foo", onFooEvent);
 
-  return <div className="App"> {isConnected ? "Connected" : "offline"}</div>;
-}
+//     return () => {
+//       socket.off("connect", onConnect);
+//       socket.off("disconnect", onDisconnect);
+//       // socket.off("foo", onFooEvent);
+//     };
+//   }, []);
+//   console.log(socket);
+
+//   return <div className="App"> {isConnected ? "Connected" : "offline"}</div>;
+// }
+
+const App = () => {
+  return (
+    <div className="p-5">
+      <div className="container flex gap-10 border-2 border-border rounded-2xl  mx-auto">
+        <div className="w-full max-w-sm">
+          <Sidebar></Sidebar>
+        </div>
+        <div className="flex-1">
+          <Outlet></Outlet>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;
