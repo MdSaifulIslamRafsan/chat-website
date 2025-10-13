@@ -1,6 +1,6 @@
 import { useTheme } from "../utils/useTheme";
 import { Button } from "./ui/button";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, UserRound, UsersRound } from "lucide-react";
 import { X } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -9,11 +9,16 @@ import { Badge } from "./ui/badge";
 import { Link } from "react-router-dom";
 import { showOnlyChat } from "../redux/features/layoutSlice";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useState } from "react";
+import { Modal } from "./modal";
 
 const Sidebar = () => {
   const { theme, setTheme } = useTheme();
   const dispatch = useAppDispatch();
   const { showSidebar } = useAppSelector((state) => state.layout);
+  const [openUserModal, setOpenUserModal] = useState(false);
+  const [openGroupModal, setOpenGroupModal] = useState(false);
+  const [selectedGroupUsers, setSelectedGroupUsers] = useState<string[]>([]);
 
   const handleUserClick = () => {
     dispatch(showOnlyChat());
@@ -86,13 +91,47 @@ const Sidebar = () => {
   ];
 
   const currentUserId = "6710f3a5c1234b001234abcd";
+  // 🧩 Create Single Chat
+  const handleCreateChat = (userId: string) => {
+    console.log("Creating single chat with:", userId);
+    setOpenUserModal(false);
+    // TODO: Create conversation in backend here
+  };
+
+  // 🧩 Create Group Chat
+  const handleCreateGroup = () => {
+    console.log("Creating group chat with:", selectedGroupUsers);
+    setOpenGroupModal(false);
+    setSelectedGroupUsers([]);
+    // TODO: Create group conversation in backend here
+  };
+
+  const toggleGroupUser = (id: string) => {
+    setSelectedGroupUsers((prev) =>
+      prev.includes(id) ? prev.filter((u) => u !== id) : [...prev, id]
+    );
+  };
 
   return (
-    <div className="w-full min-h-[calc(100vh-50px)] h-full border-r border-border flex flex-col">
+    <div className="w-full min-h-[calc(100vh-4rem)] h-full border-r border-border flex flex-col">
       {/* Header */}
       <div className="p-5 border-b border-border flex justify-between items-center">
         <h5 className="font-bold text-lg">Chats</h5>
         <div className="flex items-center gap-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setOpenUserModal(true)}
+          >
+            <UserRound />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setOpenGroupModal(true)}
+          >
+            <UsersRound />
+          </Button>
           <Button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             variant="outline"
@@ -193,6 +232,74 @@ const Sidebar = () => {
           );
         })}
       </div>
+      {/*  Single Chat Modal */}
+      <Modal
+        title="Start a New Chat"
+        description="Choose a user to start a 1-to-1 conversation"
+        open={openUserModal}
+        onOpenChange={setOpenUserModal}
+      >
+        <div className="space-y-2">
+          {Users.filter((u) => u._id !== currentUserId).map((user) => (
+            <div
+              key={user._id}
+              onClick={() => handleCreateChat(user._id)}
+              className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted cursor-pointer transition"
+            >
+              <Avatar>
+                <AvatarImage src={user.avatar} />
+                <AvatarFallback>
+                  {user.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{user.name}</p>
+                <p className="text-xs text-muted-foreground">{user.email}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      {/* Group Chat Modal */}
+      <Modal
+        title="Create a Group Chat"
+        description="Select multiple users to start a group chat"
+        open={openGroupModal}
+        onOpenChange={setOpenGroupModal}
+      >
+        <div className="space-y-2 max-h-[300px] overflow-y-auto">
+          {Users.filter((u) => u._id !== currentUserId).map((user) => (
+            <div
+              key={user._id}
+              onClick={() => toggleGroupUser(user._id)}
+              className={cn(
+                "flex items-center gap-3 p-2 rounded-xl border cursor-pointer transition",
+                selectedGroupUsers.includes(user._id)
+                  ? "bg-primary/10 border-primary"
+                  : "hover:bg-muted border-transparent"
+              )}
+            >
+              <Avatar>
+                <AvatarImage src={user.avatar} />
+                <AvatarFallback>
+                  {user.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{user.name}</p>
+                <p className="text-xs text-muted-foreground">{user.email}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {selectedGroupUsers.length > 0 && (
+          <div className="mt-4 flex justify-end">
+            <Button onClick={handleCreateGroup}>Create Group</Button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
