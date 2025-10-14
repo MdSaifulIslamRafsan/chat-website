@@ -28,6 +28,7 @@ const CSelect = ({ label, name, placeholder, options, required }: TCSelect) => {
           </FormLabel>
           <FormControl>
             <Select
+        
               onValueChange={field.onChange}
               value={field.value}
               defaultValue={field.value}

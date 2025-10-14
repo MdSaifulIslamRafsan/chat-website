@@ -11,6 +11,7 @@ import {
 import { Button } from "../components/ui/button";
 import CForm from "../components/form/CForm";
 import CInput from "../components/form/CInput";
+import { loginSchema } from "../Schema/loginSchema";
 
 const Login = () => {
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
@@ -27,6 +28,7 @@ const Login = () => {
           <CForm
             onSubmit={onSubmit}
             defaultValues={{ email: "", password: "" }}
+            resolver={loginSchema}
           >
             <CInput
               fieldName="email"
