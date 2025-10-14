@@ -57,6 +57,38 @@ const Sidebar = () => {
       avatar: "https://i.pravatar.cc/150?img=4",
       isActive: false,
     },
+    {
+      _id: "6710f3a5cas1234b001234abd0",
+      name: "Rafi Rahmsan",
+      email: "rafi@example.com",
+      gender: "male",
+      avatar: "https://i.pravatar.cc/150?img=4",
+      isActive: false,
+    },
+    {
+      _id: "6710f3aas5c1234b001234abd0",
+      name: "Rafi Rahmas",
+      email: "rafi@example.com",
+      gender: "male",
+      avatar: "https://i.pravatar.cc/150?img=4",
+      isActive: false,
+    },
+    {
+      _id: "6710f3a5c1s234b001234abd0",
+      name: "Rafi Rahmaan",
+      email: "rafi@example.com",
+      gender: "male",
+      avatar: "https://i.pravatar.cc/150?img=4",
+      isActive: false,
+    },
+    {
+      _id: "6710f3a5asc1234b001234abd0",
+      name: "Rafi Rahasman",
+      email: "rafi@example.com",
+      gender: "male",
+      avatar: "https://i.pravatar.cc/150?img=4",
+      isActive: false,
+    },
   ];
 
   const conversations = [
@@ -235,16 +267,21 @@ const Sidebar = () => {
       {/*  Single Chat Modal */}
       <Modal
         title="Start a New Chat"
-        description="Choose a user to start a 1-to-1 conversation"
+        description="Select one user to start a 1-to-1 conversation"
         open={openUserModal}
         onOpenChange={setOpenUserModal}
       >
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-[300px] custom-scrollbar overflow-y-auto">
           {Users.filter((u) => u._id !== currentUserId).map((user) => (
             <div
               key={user._id}
-              onClick={() => handleCreateChat(user._id)}
-              className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted cursor-pointer transition"
+              onClick={() => setSelectedGroupUsers([user._id])} 
+              className={cn(
+                "flex items-center gap-3 p-2 rounded-xl border cursor-pointer transition",
+                selectedGroupUsers.includes(user._id)
+                  ? "bg-primary/10 border-primary"
+                  : "hover:bg-muted border-transparent"
+              )}
             >
               <Avatar>
                 <AvatarImage src={user.avatar} />
@@ -259,6 +296,14 @@ const Sidebar = () => {
             </div>
           ))}
         </div>
+
+        {selectedGroupUsers.length > 0 && (
+          <div className="mt-4 flex justify-end">
+            <Button onClick={() => handleCreateChat(selectedGroupUsers[0])}>
+              Start Chat
+            </Button>
+          </div>
+        )}
       </Modal>
 
       {/* Group Chat Modal */}
@@ -268,7 +313,7 @@ const Sidebar = () => {
         open={openGroupModal}
         onOpenChange={setOpenGroupModal}
       >
-        <div className="space-y-2 max-h-[300px] overflow-y-auto">
+        <div className="space-y-2 max-h-[300px] custom-scrollbar overflow-y-auto">
           {Users.filter((u) => u._id !== currentUserId).map((user) => (
             <div
               key={user._id}
