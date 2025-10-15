@@ -45,7 +45,6 @@ const refreshTokenFromCookie = async (refreshToken: string) => {
   const { id, iat } = decoded;
 
   const user = await User.findById(id);
-  console.log({ refreshToken, decoded, user });
   if (!user) {
     throw new AppError(httpStatus.FORBIDDEN, "User not found");
   }
