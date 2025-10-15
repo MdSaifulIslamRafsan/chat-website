@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { TUser } from "./user.interface";
+import { TUser, UserModel } from "./user.interface";
 import bcrypt from "bcrypt";
 const userSchema = new mongoose.Schema<TUser>(
   {
@@ -67,4 +67,23 @@ userSchema.pre("aggregate", function (next) {
   this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
   next();
 });
-export const User = mongoose.model<TUser>("User", userSchema);
+
+userSchema.static(
+  "isUserExistByCustomEmail",
+  async function isUserExistByCustomEmail(email: string) {
+    const existingUser = await User.findOne({ email }).select("+password");
+    return existingUser;
+  }
+);
+
+userSchema.statics.isDeleted = async function (email: string) {
+  return await User.findOne({ email, isDeleted: true });
+};
+userSchema.statics.isValidPassword = async function (
+  password: string,
+  hashPassword: string
+) {
+  return await bcrypt.compare(password, hashPassword);
+};
+
+export const User = mongoose.model<TUser, UserModel>("User", userSchema);
