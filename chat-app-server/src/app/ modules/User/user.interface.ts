@@ -18,4 +18,8 @@ export interface UserModel extends Model<TUser> {
   isUserExistByCustomEmail(email: string): Promise<TUser>;
   isValidPassword(password: string, hashPassword: string): Promise<boolean>;
   isDeleted(id: string): Promise<TUser>;
+  isJWTTokenIssuedBeforePassword(
+    issuedAt: number,
+    passwordChangeAt: Date
+  ): Promise<boolean>;
 }

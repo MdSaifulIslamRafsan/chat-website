@@ -85,5 +85,12 @@ userSchema.statics.isValidPassword = async function (
 ) {
   return await bcrypt.compare(password, hashPassword);
 };
+userSchema.statics.isJWTTokenIssuedBeforePassword = async function (
+  issuedAt: number,
+  passwordChangeAt: Date
+) {
+  const passwordChangedTime = new Date(passwordChangeAt).getTime() / 1000;
+  return issuedAt < passwordChangedTime;
+};
 
 export const User = mongoose.model<TUser, UserModel>("User", userSchema);
