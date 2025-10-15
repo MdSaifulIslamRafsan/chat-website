@@ -1,24 +1,15 @@
 import { useRef, useState } from "react";
+import { Paperclip, Send, Smile } from "lucide-react";
 
-import { ArrowLeft, Paperclip, Phone, Send, Smile, Video } from "lucide-react";
-import { cn } from "../lib/utils";
 import { Button } from "../components/ui/button";
 import EmojiPicker, { Theme } from "emoji-picker-react";
-
 import { Textarea } from "../components/ui/textarea";
 import type { TMessage } from "../Types/MessageTypes";
-import { useAppDispatch } from "../redux/hooks";
-import { showOnlySidebar } from "../redux/features/layoutSlice";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import ChatRoomHeader from "../components/ChatRoom/ChatRoomHeader";
+import ChatRoomMessage from "../components/ChatRoom/ChatRoomMessage";
 
 const ChatRoom = () => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const dispatch = useAppDispatch();
-
-  const handleUserClick = () => {
-    dispatch(showOnlySidebar());
-  };
-
   const [newMessage, setNewMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [messages, setMessages] = useState<TMessage[]>([
@@ -100,65 +91,9 @@ const ChatRoom = () => {
   return (
     <div className={"flex flex-col w-full h-[calc(100vh-4rem)] bg-background"}>
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border p-4">
-        <div className="flex items-center gap-2">
-          <Button
-            className="md:hidden"
-            onClick={handleUserClick}
-            size="icon"
-            variant="ghost"
-          >
-            <ArrowLeft className="w-5 h-5"></ArrowLeft>
-          </Button>
-          <Avatar>
-            <AvatarImage src="https://i.pravatar.cc/150?img=5" />
-            <AvatarFallback>G</AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="font-semibold md:text-lg line-clamp-1">
-              Yong Tonghyon
-            </h2>
-            <p className="text-[11px] md:text-xs text-muted-foreground">
-              Last seen recently
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2 items-center">
-          <Button size="icon" variant="ghost">
-            <Phone className="h-5 w-5"></Phone>
-          </Button>
-          <Button size="icon" variant="ghost">
-            <Video className="h-5 w-5"></Video>
-          </Button>
-        </div>
-      </div>
-
+      <ChatRoomHeader></ChatRoomHeader>
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 bg-muted/10">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={cn(
-              "flex flex-col max-w-[80%]",
-              msg.sender === "me" ? "ml-auto items-end" : "mr-auto items-start"
-            )}
-          >
-            <div
-              className={cn(
-                "rounded-2xl px-4 py-2 text-sm shadow-sm",
-                msg.sender === "me"
-                  ? "bg-primary text-primary-foreground rounded-tr-none"
-                  : "bg-muted text-foreground rounded-tl-none"
-              )}
-            >
-              {msg.text}
-            </div>
-            <span className="text-[10px] text-muted-foreground mt-1">
-              {msg.time}
-            </span>
-          </div>
-        ))}
-      </div>
+      <ChatRoomMessage></ChatRoomMessage>
 
       {/* Input Box */}
       <div className="border-t border-border p-4 flex items-center gap-2 bg-background sticky bottom-0">

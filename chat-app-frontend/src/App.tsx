@@ -2,7 +2,7 @@
 // import { socket } from "./utils/socket";
 
 import { Outlet } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
+import Sidebar from "./components/Sidebar/Sidebar";
 import { useAppSelector } from "./redux/hooks";
 
 // export default function App() {

@@ -1,21 +1,22 @@
-import { useTheme } from "../utils/useTheme";
-import { Button } from "./ui/button";
-import { Moon, Sun, UserRound, UsersRound } from "lucide-react";
-import { X } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { cn } from "../lib/utils";
-import { Badge } from "./ui/badge";
+import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { cn } from "../../lib/utils";
+import { Badge } from "../ui/badge";
 import { Link } from "react-router-dom";
-import { showOnlyChat } from "../redux/features/layoutSlice";
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { showOnlyChat } from "../../redux/features/layoutSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useState } from "react";
-import { Modal } from "./modal";
+import { Modal } from "../modal";
+import SidebarHeader from "./SidebarHeader";
+
 
 const Sidebar = () => {
-  const { theme, setTheme } = useTheme();
+
   const dispatch = useAppDispatch();
-  const { showSidebar } = useAppSelector((state) => state.layout);
+
+  const { user } = useAppSelector((state) => state.auth);
+
   const [openUserModal, setOpenUserModal] = useState(false);
   const [openGroupModal, setOpenGroupModal] = useState(false);
   const [selectedGroupUsers, setSelectedGroupUsers] = useState<string[]>([]);
@@ -23,6 +24,8 @@ const Sidebar = () => {
   const handleUserClick = () => {
     dispatch(showOnlyChat());
   };
+
+
 
   const Users = [
     {
@@ -122,15 +125,15 @@ const Sidebar = () => {
     },
   ];
 
-  const currentUserId = "6710f3a5c1234b001234abcd";
-  // 🧩 Create Single Chat
+  const currentUserId = user?.id;
+  // Create Single Chat
   const handleCreateChat = (userId: string) => {
     console.log("Creating single chat with:", userId);
     setOpenUserModal(false);
     // TODO: Create conversation in backend here
   };
 
-  // 🧩 Create Group Chat
+  //  Create Group Chat
   const handleCreateGroup = () => {
     console.log("Creating group chat with:", selectedGroupUsers);
     setOpenGroupModal(false);
@@ -147,42 +150,7 @@ const Sidebar = () => {
   return (
     <div className="w-full min-h-[calc(100vh-4rem)] h-full border-r border-border flex flex-col">
       {/* Header */}
-      <div className="p-5 border-b border-border flex justify-between items-center">
-        <h5 className="font-bold text-lg">Chats</h5>
-        <div className="flex items-center gap-2">
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => setOpenUserModal(true)}
-          >
-            <UserRound />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => setOpenGroupModal(true)}
-          >
-            <UsersRound />
-          </Button>
-          <Button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            variant="outline"
-            size="icon"
-          >
-            <Sun className="h-[1.2rem] w-[1.2rem] dark:hidden" />
-            <Moon className="h-[1.2rem] w-[1.2rem] hidden dark:block" />
-          </Button>
-          {showSidebar && (
-            <Link to={currentUserId}>
-              {" "}
-              <X
-                onClick={() => dispatch(showOnlyChat())}
-                className="md:hidden cursor-pointer"
-              />
-            </Link>
-          )}
-        </div>
-      </div>
+       <SidebarHeader setOpenGroupModal={setOpenGroupModal} setOpenUserModal={setOpenUserModal}></SidebarHeader>
 
       {/* Conversations List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -275,7 +243,7 @@ const Sidebar = () => {
           {Users.filter((u) => u._id !== currentUserId).map((user) => (
             <div
               key={user._id}
-              onClick={() => setSelectedGroupUsers([user._id])} 
+              onClick={() => setSelectedGroupUsers([user._id])}
               className={cn(
                 "flex items-center gap-3 p-2 rounded-xl border cursor-pointer transition",
                 selectedGroupUsers.includes(user._id)

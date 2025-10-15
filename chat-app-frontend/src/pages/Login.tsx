@@ -1,6 +1,6 @@
 import { type FieldValues, type SubmitHandler } from "react-hook-form";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   Card,
@@ -12,10 +12,37 @@ import { Button } from "../components/ui/button";
 import CForm from "../components/form/CForm";
 import CInput from "../components/form/CInput";
 import { loginSchema } from "../Schema/loginSchema";
+import { useLoginMutation } from "../redux/features/auth/authApi";
+import { toast } from "sonner";
+import { useAppDispatch } from "../redux/hooks";
+import { setUser } from "../redux/features/auth/authSlice";
+import type { TErrorMessage } from "../Types/errorMessageTypes";
+import { verifyToken } from "../utils/verifyToken";
+import type { TUser } from "../Types/UserTypes";
 
 const Login = () => {
+  const [login] = useLoginMutation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     console.log("Form Data:", data);
+    const toastId = toast.loading("logging in...");
+    try {
+      const res = await login(data).unwrap();
+      const token = res.data.accessToken;
+      const userData = verifyToken(token) as TUser;
+      dispatch(setUser({ user: userData, token }));
+      toast.success(res?.message || `User login successfully`, {
+        id: toastId,
+        duration: 2000,
+      });
+      navigate(`/`);
+    } catch (error: unknown) {
+      toast.error(`something went wrong ${(error as TErrorMessage).message}`, {
+        id: toastId,
+        duration: 2000,
+      });
+    }
   };
 
   return (

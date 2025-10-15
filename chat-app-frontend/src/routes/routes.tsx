@@ -4,6 +4,7 @@ import ChatRoom from "../pages/ChatRoom";
 import EmptyChat from "../pages/EmptyChat";
 import Register from "../pages/Register";
 import Login from "../pages/Login";
+import ProtectedRoute from "./ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -12,11 +13,19 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <EmptyChat />,
+        element: (
+          <ProtectedRoute>
+            <EmptyChat />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/:id",
-        element: <ChatRoom />,
+        element: (
+          <ProtectedRoute>
+            <ChatRoom />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

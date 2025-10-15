@@ -10,13 +10,34 @@ import { Button } from "../components/ui/button";
 import CForm from "../components/form/CForm";
 import CInput from "../components/form/CInput";
 import type { FieldValues, SubmitHandler } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CSelect from "../components/form/CSelect";
 import { registerSchema } from "../Schema/registerSchema";
+import { toast } from "sonner";
+import type { TErrorMessage } from "../Types/errorMessageTypes";
+import { useRegisterMutation } from "../redux/features/register/registerApi";
 
 const Register = () => {
+  const navigate = useNavigate();
+  const [register, { isLoading }] = useRegisterMutation();
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    console.log("from Data", data);
+    const toastId = toast.loading("logging in...");
+    try {
+      const res = await register(data).unwrap();
+      console.log(res);
+      if (res?.success) {
+        toast.success(res?.message, {
+          id: toastId,
+          duration: 2000,
+        });
+        navigate(`/login`);
+      }
+    } catch (error: unknown) {
+      toast.error((error as TErrorMessage).message || `something went wrong`, {
+        id: toastId,
+        duration: 2000,
+      });
+    }
   };
 
   return (
@@ -87,7 +108,7 @@ const Register = () => {
             ></CInput>
 
             <Button type="submit" className="w-full">
-              Register
+              {isLoading ? "Register..." : "Register"}
             </Button>
             <p className="text-sm text-center mt-3">
               Already have an account?{" "}
