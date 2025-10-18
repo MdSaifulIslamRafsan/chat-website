@@ -4,5 +4,7 @@ import { userController } from "./user.controller";
 const router = express.Router();
 
 router.post("/", userController.createUser);
-// router.get("/", userController.getUser);
+router.get("/:id/group", userController.getForGroupUser);
+router.get("/:id", userController.getUser);
+
 export const UserRoutes = router;

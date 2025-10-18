@@ -20,7 +20,7 @@ const createConversationIntoDB = async (data: TConversation) => {
       participants: { $all: participants, $size: 2 },
     }).populate("participants", "name email profilePic");
     if (existingConversation) {
-      return existingConversation;
+      throw new AppError(httpStatus.CONFLICT, "Conversation already exists");
     }
     const newConversation = await Conversation.create({
       participants,
