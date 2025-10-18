@@ -25,7 +25,6 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    console.log("Form Data:", data);
     const toastId = toast.loading("logging in...");
     try {
       const res = await login(data).unwrap();
@@ -46,13 +45,14 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/10">
+    <div className="flex  items-center justify-center min-h-screen bg-muted/10">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
           <CardTitle className="text-center text-2xl">Login</CardTitle>
         </CardHeader>
         <CardContent>
           <CForm
+            styles="space-y-4"
             onSubmit={onSubmit}
             defaultValues={{ email: "", password: "" }}
             resolver={loginSchema}

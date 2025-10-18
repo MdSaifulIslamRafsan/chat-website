@@ -8,7 +8,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { TCForm, TFormConfig } from "../../Types/CFormTypes";
 import { Form } from "../ui/form";
 
-const CForm = ({ onSubmit, children, resolver, defaultValues }: TCForm) => {
+const CForm = ({
+  onSubmit,
+  children,
+  resolver,
+  defaultValues,
+  styles,
+}: TCForm) => {
   const formConfig: TFormConfig = {};
   if (defaultValues) {
     formConfig["defaultValues"] = defaultValues;
@@ -26,7 +32,7 @@ const CForm = ({ onSubmit, children, resolver, defaultValues }: TCForm) => {
       <Form {...methods}>
         <form
           onSubmit={methods.handleSubmit(handleSubmit)}
-          className="space-y-4"
+          className={`${styles}`}
         >
           {children}
         </form>

@@ -48,6 +48,7 @@ const Register = () => {
         </CardHeader>
         <CardContent>
           <CForm
+            styles="space-y-4"
             onSubmit={onSubmit}
             resolver={registerSchema}
             defaultValues={{

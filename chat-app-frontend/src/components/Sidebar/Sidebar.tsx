@@ -1,4 +1,3 @@
-
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { cn } from "../../lib/utils";
@@ -6,12 +5,12 @@ import { Badge } from "../ui/badge";
 import { Link } from "react-router-dom";
 import { showOnlyChat } from "../../redux/features/layoutSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Modal } from "../modal";
 import SidebarHeader from "./SidebarHeader";
 
-
 const Sidebar = () => {
+
 
   const dispatch = useAppDispatch();
 
@@ -21,11 +20,9 @@ const Sidebar = () => {
   const [openGroupModal, setOpenGroupModal] = useState(false);
   const [selectedGroupUsers, setSelectedGroupUsers] = useState<string[]>([]);
 
-  const handleUserClick = () => {
+  const handleUserClick = useCallback(() => {
     dispatch(showOnlyChat());
-  };
-
-
+  }, [dispatch]);
 
   const Users = [
     {
@@ -150,7 +147,10 @@ const Sidebar = () => {
   return (
     <div className="w-full min-h-[calc(100vh-4rem)] h-full border-r border-border flex flex-col">
       {/* Header */}
-       <SidebarHeader setOpenGroupModal={setOpenGroupModal} setOpenUserModal={setOpenUserModal}></SidebarHeader>
+      <SidebarHeader
+        setOpenGroupModal={setOpenGroupModal}
+        setOpenUserModal={setOpenUserModal}
+      ></SidebarHeader>
 
       {/* Conversations List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -160,7 +160,7 @@ const Sidebar = () => {
               <Link
                 to={conv._id}
                 key={conv._id}
-                onClick={() => handleUserClick()}
+                onClick={handleUserClick}
                 className="flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted transition"
               >
                 <div className="flex gap-3 items-center">
