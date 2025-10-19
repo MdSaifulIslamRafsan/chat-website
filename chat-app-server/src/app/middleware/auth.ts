@@ -9,7 +9,7 @@ import { Conversation } from "../ modules/Conversation/conversation.model";
 
 const auth = () => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization;
+    const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       throw new AppError(httpStatus.UNAUTHORIZED, "Invalid authorization");
     }
@@ -38,6 +38,7 @@ const auth = () => {
     }
 
     const conversationId = req?.params?.conversationId;
+
     if (conversationId) {
       const conversation = await Conversation.findOne({
         _id: conversationId,

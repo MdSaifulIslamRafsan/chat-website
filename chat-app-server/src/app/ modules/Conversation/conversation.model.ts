@@ -17,6 +17,11 @@ const conversationSchema = new mongoose.Schema<TConversation>(
         ref: "User",
       },
     ],
+    blockedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
     groupAdmin: [
       {
         type: mongoose.Schema.Types.ObjectId,

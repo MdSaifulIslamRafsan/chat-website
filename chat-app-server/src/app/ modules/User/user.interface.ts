@@ -8,10 +8,10 @@ export interface TUser {
   isActive: boolean;
   avatar: string;
   gender: "male" | "female" | "other";
-  blockUser?: Types.ObjectId[];
   isDeleted?: boolean;
   needsPasswordChange: boolean;
   passwordChangeAt: Date;
+  lastSeen : Date
 }
 
 export interface UserModel extends Model<TUser> {

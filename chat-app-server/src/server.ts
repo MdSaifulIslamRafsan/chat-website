@@ -15,20 +15,35 @@ const io = new Server(server, {
   },
 });
 
+const onlineUsers = new Map<string, string>();
+
 // Socket.io connections
 io.on("connection", (socket) => {
   console.log("✅ A user connected:", socket.id);
   // Step 1: Save userId in the socket instance
   socket.on("userId", async (id) => {
-    socket.userId = id; // store userId for later use
+    socket.userId = id;
     await User.findByIdAndUpdate(id, { isActive: true });
+    onlineUsers.set(id, socket.id);
+    console.log("Online Users:", Array.from(onlineUsers.keys()));
+    io.emit("update_online_users", Array.from(onlineUsers.keys()));
   });
-  // Step 2: Handle disconnect and update using stored userId
   socket.on("disconnect", async () => {
     console.log("❌ A user disconnected:", socket.id);
-    if (socket.userId) {
-      await User.findByIdAndUpdate(socket.userId, { isActive: false });
+    for (const [userId, sId] of onlineUsers.entries()) {
+      if (sId === socket.id) {
+        onlineUsers.delete(userId);
+
+        await User.findByIdAndUpdate(socket.userId, {
+          isActive: false,
+          lastSeen: new Date(),
+        });
+
+        break;
+      }
     }
+
+    io.emit("update_online_users", Array.from(onlineUsers.keys()));
   });
 });
 

@@ -34,16 +34,11 @@ const userSchema = new mongoose.Schema<TUser>(
       type: String,
       required: true,
     },
-    blockUser: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
     isDeleted: {
       type: Boolean,
       default: false,
     },
+    lastSeen: { type: Date, default: null },
   },
   { timestamps: true }
 );
