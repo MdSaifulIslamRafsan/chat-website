@@ -9,10 +9,9 @@ import {
 } from "../ui/form";
 import type { TCTextarea } from "../../Types/CTextareaTypes";
 
-
-
 const CTextarea = ({ fieldName, label, placeholder, required }: TCTextarea) => {
   const { control } = useFormContext();
+  // const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   return (
     <FormField

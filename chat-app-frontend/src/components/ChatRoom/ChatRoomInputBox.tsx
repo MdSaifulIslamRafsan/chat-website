@@ -10,6 +10,7 @@ import EmojiPickerWithForm from "./EmojiPickerWithForm";
 
 const ChatRoomInputBox = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  // const formRef = useRef<HTMLFormElement>(null);
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     console.log("Submitted data:", data);
@@ -46,6 +47,7 @@ const ChatRoomInputBox = () => {
             variant="ghost"
             size="icon"
             type="button"
+              data-emoji-button
             onClick={() => setShowEmojiPicker((prev) => !prev)}
             className="absolute right-2 top-1/2 -translate-y-1/2"
           >
