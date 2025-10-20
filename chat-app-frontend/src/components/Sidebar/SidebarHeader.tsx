@@ -21,25 +21,38 @@ import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useTheme } from "../../utils/useTheme";
 import { showOnlyChat } from "../../redux/features/layoutSlice";
+import { cn } from "../../lib/utils";
+import { socket } from "../../utils/socket";
 interface SidebarHeaderProps {
   setOpenGroupModal: React.Dispatch<React.SetStateAction<boolean>>;
   setOpenUserModal: React.Dispatch<React.SetStateAction<boolean>>;
+  isConnected: boolean;
 }
 
 const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   setOpenGroupModal,
   setOpenUserModal,
+  isConnected,
 }) => {
   const { showSidebar } = useAppSelector((state) => state.layout);
   const { theme, setTheme } = useTheme();
   const dispatch = useAppDispatch();
   const handleLogout = () => {
+    socket.disconnect();
     dispatch(logout());
     toast.success("logout successfully");
   };
   return (
     <div className="p-5 border-b border-border flex justify-between items-center">
-      <h5 className="font-bold text-lg">Chats</h5>
+      <div className="relative">
+        <h5 className="font-bold text-lg">Chats</h5>
+        <span
+          className={cn(
+            "absolute top-0 -right-5 w-3 h-3 rounded-full border-2 border-background",
+            isConnected ? "bg-green-500" : "bg-gray-400"
+          )}
+        />
+      </div>
       <div className="flex items-center gap-2">
         <ButtonGroup>
           <DropdownMenu>

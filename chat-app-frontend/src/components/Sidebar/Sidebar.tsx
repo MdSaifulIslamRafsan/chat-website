@@ -10,17 +10,22 @@ import { Modal } from "../modal";
 import SidebarHeader from "./SidebarHeader";
 import {
   useCreateConversationMutation,
+  useGetConversationQuery,
   useGetUserForGroupConversationQuery,
   useGetUserForSingleConversationQuery,
-} from "../../redux/features/User/userApi";
+} from "../../redux/features/Conversation/conversationApi";
 import type { createConversationUserTypes } from "../../Types/createConversationUserTypes";
 import { socket } from "../../utils/socket";
+import { toast } from "sonner";
+import type { TErrorMessage } from "../../Types/errorMessageTypes";
+import type { TConversation } from "../../Types/conversationTypes";
+import { getGroupDisplayName } from "./helperFunction";
 
 const Sidebar = () => {
   const dispatch = useAppDispatch();
   const [isConnected, setIsConnected] = useState(socket.connected);
-  console.log(isConnected);
-
+  const [isUsersConnected, setIsUsersConnected] = useState<string[]>([]);
+  console.log({ isConnected });
   const { user } = useAppSelector((state) => state.auth);
   const {
     data: userForSingleConversation,
@@ -30,9 +35,16 @@ const Sidebar = () => {
     data: userForGroupConversation,
     isLoading: loadingForGroupConversation,
   } = useGetUserForGroupConversationQuery(user?.id);
-  console.log(userForGroupConversation?.data);
   const [createConversation, { isLoading: createConversationLoading }] =
     useCreateConversationMutation();
+  const [conversations, setConversations] = useState<TConversation[]>([]);
+  const { data, isLoading } = useGetConversationQuery(user?.id);
+
+  useEffect(() => {
+    setConversations(data?.data || []);
+  }, [data?.data]);
+
+  console.log(conversations);
 
   const [openUserModal, setOpenUserModal] = useState(false);
   const [openGroupModal, setOpenGroupModal] = useState(false);
@@ -45,20 +57,31 @@ const Sidebar = () => {
     }
 
     function onDisconnect() {
-      socket.emit("userId", user?.id);
       setIsConnected(false);
     }
     function getOnlineUser(onlineUsers: string[]) {
       console.log("Currently online:", onlineUsers);
+      setIsUsersConnected(onlineUsers);
+    }
+
+    function getConversation(newConversation: TConversation) {
+      console.log({ newConversation });
+      setConversations((pev) => [...pev, newConversation]);
     }
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("update_online_users", getOnlineUser);
+    socket.on("new_conversation", getConversation);
+    if (socket.connected) {
+      onConnect();
+    }
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
+      socket.off("update_online_users", getOnlineUser);
+      socket.off("new_conversation", getConversation);
     };
   }, [user?.id]);
 
@@ -66,123 +89,49 @@ const Sidebar = () => {
     dispatch(showOnlyChat());
   }, [dispatch]);
 
-  const Users = [
-    {
-      _id: "6710f3a5c1234b001234abcd",
-      name: "Md Saiful Islam",
-      email: "saiful@example.com",
-      gender: "male",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      isActive: true,
-    },
-    {
-      _id: "6710f3a5c1234b001234abce",
-      name: "Jannatul Ferdous",
-      email: "jannat@example.com",
-      gender: "female",
-      avatar: "https://i.pravatar.cc/150?img=2",
-      isActive: false,
-    },
-    {
-      _id: "6710f3a5c1234b001234abcf",
-      name: "Tawhid Hasan",
-      email: "tawhid@example.com",
-      gender: "male",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      isActive: true,
-    },
-    {
-      _id: "6710f3a5c1234b001234abd0",
-      name: "Rafi Rahman",
-      email: "rafi@example.com",
-      gender: "male",
-      avatar: "https://i.pravatar.cc/150?img=4",
-      isActive: false,
-    },
-    {
-      _id: "6710f3a5cas1234b001234abd0",
-      name: "Rafi Rahmsan",
-      email: "rafi@example.com",
-      gender: "male",
-      avatar: "https://i.pravatar.cc/150?img=4",
-      isActive: false,
-    },
-    {
-      _id: "6710f3aas5c1234b001234abd0",
-      name: "Rafi Rahmas",
-      email: "rafi@example.com",
-      gender: "male",
-      avatar: "https://i.pravatar.cc/150?img=4",
-      isActive: false,
-    },
-    {
-      _id: "6710f3a5c1s234b001234abd0",
-      name: "Rafi Rahmaan",
-      email: "rafi@example.com",
-      gender: "male",
-      avatar: "https://i.pravatar.cc/150?img=4",
-      isActive: false,
-    },
-    {
-      _id: "6710f3a5asc1234b001234abd0",
-      name: "Rafi Rahasman",
-      email: "rafi@example.com",
-      gender: "male",
-      avatar: "https://i.pravatar.cc/150?img=4",
-      isActive: false,
-    },
-  ];
-
-  const conversations = [
-    {
-      _id: "6710f4c5c1234b001234abcd",
-      groupName: null,
-      isGroup: false,
-      participants: ["6710f3a5c1234b001234abcd", "6710f3a5c1234b001234abce"],
-      lastMessage: "Let's meet tomorrow!",
-      updatedAt: "2025-10-12T09:00:00.000Z",
-    },
-    {
-      _id: "6710f4c5c1234b001234abce",
-      groupName: "Developers Hangout",
-      isGroup: true,
-      participants: [
-        "6710f3a5c1234b001234abcd",
-        "6710f3a5c1234b001234abcf",
-        "6710f3a5c1234b001234abd0",
-      ],
-      lastMessage: "Pushing the latest code update.",
-      updatedAt: "2025-10-12T09:20:00.000Z",
-    },
-    {
-      _id: "6710f4c5c1234b001234abcf",
-      groupName: null,
-      isGroup: false,
-      participants: ["6710f3a5c1234b001234abcf", "6710f3a5c1234b001234abd0"],
-      lastMessage: "See you later!",
-      updatedAt: "2025-10-12T07:00:00.000Z",
-    },
-  ];
-
   // Create Single Chat
-  const handleCreateChat = () => {
-    console.log("Creating single chat with:", [
-      selectedGroupUsers[0],
-      user?.id,
-    ]);
-    setOpenUserModal(false);
-    createConversation({
-      participants: [selectedGroupUsers[0], user?.id],
-    });
-    // TODO: Create conversation in backend here
+  const handleCreateChat = async () => {
+    const toastId = toast.loading("logging in...");
+    try {
+      const res = await createConversation({
+        participants: [selectedGroupUsers[0], user?.id],
+        isGroup: false,
+      }).unwrap();
+      toast.success(res?.message || `User login successfully`, {
+        id: toastId,
+        duration: 2000,
+      });
+      setSelectedGroupUsers([]);
+      setOpenUserModal(false);
+    } catch (error) {
+      toast.error(`something went wrong ${(error as TErrorMessage).message}`, {
+        id: toastId,
+        duration: 2000,
+      });
+    }
   };
 
   //  Create Group Chat
-  const handleCreateGroup = () => {
-    console.log("Creating group chat with:", selectedGroupUsers);
-    setOpenGroupModal(false);
-    setSelectedGroupUsers([]);
-    // TODO: Create group conversation in backend here
+  const handleCreateGroup = async () => {
+    const toastId = toast.loading("logging in...");
+    try {
+      const res = await createConversation({
+        participants: [...selectedGroupUsers, user?.id],
+        isGroup: true,
+        groupName: "sa",
+      }).unwrap();
+      toast.success(res?.message || `User login successfully`, {
+        id: toastId,
+        duration: 2000,
+      });
+      setSelectedGroupUsers([]);
+      setOpenGroupModal(false);
+    } catch (error) {
+      toast.error(`something went wrong ${(error as TErrorMessage).message}`, {
+        id: toastId,
+        duration: 2000,
+      });
+    }
   };
 
   const toggleGroupUser = (id: string) => {
@@ -190,93 +139,122 @@ const Sidebar = () => {
       prev.includes(id) ? prev.filter((u) => u !== id) : [...prev, id]
     );
   };
-
+  if (isLoading) {
+    return "loading...";
+  }
   return (
     <div className="w-full min-h-[calc(100vh-4rem)] h-full border-r border-border flex flex-col">
       {/* Header */}
       <SidebarHeader
+        isConnected={isConnected}
         setOpenGroupModal={setOpenGroupModal}
         setOpenUserModal={setOpenUserModal}
       ></SidebarHeader>
 
       {/* Conversations List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {conversations.map((conv) => {
-          if (conv.isGroup) {
+        {conversations?.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            No conversations yet
+          </div>
+        ) : (
+          conversations.map((conv: TConversation) => {
+            if (conv?.isGroup) {
+              const groupDisplayName = getGroupDisplayName(
+                conv,
+                user?.id as string
+              );
+
+              return (
+                <Link
+                  to={`/${conv?._id}`}
+                  key={conv?._id}
+                  onClick={handleUserClick}
+                  className="flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted transition"
+                >
+                  <div className="flex gap-3 items-center">
+                    <Avatar>
+                      <AvatarImage src="https://i.pravatar.cc/150?img=5" />
+                      <AvatarFallback>G</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <p className="font-semibold">{groupDisplayName}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        {conv?.lastMessage ||
+                          `Group with ${conv.participants.length} members`}
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <Badge className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">
+                      {conv?.unreadCount || 0}
+                    </Badge>
+                  </div>
+                </Link>
+              );
+            }
+
+            // For one-on-one chats
+            const otherUser = conv?.participants?.find(
+              (participant) => participant._id !== user?.id
+            );
+
+            if (!otherUser) {
+              console.warn("Other user not found in conversation:", conv?._id);
+              return null;
+            }
+
             return (
               <Link
-                to={conv._id}
-                key={conv._id}
+                to={`/${conv?._id}`}
+                key={conv?._id}
                 onClick={handleUserClick}
-                className="flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted transition"
+                className="flex justify-between items-center gap-3 p-3 rounded-xl hover:bg-muted transition"
               >
-                <div className="flex gap-3 items-center">
-                  <Avatar>
-                    <AvatarImage src="https://i.pravatar.cc/150?img=5" />
-                    <AvatarFallback>G</AvatarFallback>
-                  </Avatar>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Avatar>
+                      <AvatarImage
+                        src={otherUser?.avatar}
+                        alt={otherUser?.name}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                      <AvatarFallback>
+                        {otherUser?.name?.charAt(0)?.toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    {/* Online indicator */}
+                    <span
+                      className={cn(
+                        "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background",
+                        isUsersConnected.includes(otherUser?._id)
+                          ? "bg-green-500"
+                          : "bg-gray-400"
+                      )}
+                    />
+                  </div>
                   <div className="flex flex-col">
-                    <p className="font-semibold">{conv.groupName}</p>
+                    <p className="font-medium">
+                      {otherUser?.name || "Unknown User"}
+                    </p>
                     <p className="text-sm text-muted-foreground line-clamp-1">
-                      {conv.lastMessage}
+                      {conv?.lastMessage || "Start a conversation"}
                     </p>
                   </div>
                 </div>
-                <div className="">
+                <div>
                   <Badge className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">
-                    8
+                    {conv?.unreadCount || 0}
                   </Badge>
                 </div>
               </Link>
             );
-          }
-
-          const otherUserId = conv.participants.find((id) => id !== user?.id);
-          const otherUser = Users.find((u) => u._id === otherUserId);
-
-          if (!otherUser) return null;
-
-          return (
-            <Link
-              to={conv._id}
-              key={conv._id}
-              onClick={() => handleUserClick()}
-              className="flex justify-between items-center gap-3 p-3 rounded-xl hover:bg-muted transition"
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar>
-                    <AvatarImage src={otherUser.avatar} />
-                    <AvatarFallback>
-                      {otherUser.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {/* ✅ Online indicator */}
-                  <span
-                    className={cn(
-                      "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background",
-                      otherUser.isActive ? "bg-green-500" : "bg-gray-400"
-                    )}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <p className="font-medium">{otherUser.name}</p>
-                  <p className="text-sm text-muted-foreground line-clamp-1">
-                    {conv.lastMessage}
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-between">
-                <div className="">
-                  <Badge className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">
-                    8
-                  </Badge>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+          })
+        )}
       </div>
+
       {loadingForSingleConversation ? (
         "Loading"
       ) : (

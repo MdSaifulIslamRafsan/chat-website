@@ -6,14 +6,14 @@ const userApi = baseApi.injectEndpoints({
       query: (userId) => ({
         url: `/user/${userId}`,
       }),
-      providesTags: ["User"],
+      providesTags: ["Conversation"],
     }),
     getUserForGroupConversation: builder.query({
       query: (userId) => ({
         url: `/user/${userId}/group`,
         method: "GET",
       }),
-      providesTags: ["User"],
+      providesTags: ["Conversation"],
     }),
     createConversation: builder.mutation({
       query: (userInfo) => ({
@@ -21,7 +21,14 @@ const userApi = baseApi.injectEndpoints({
         method: "POST",
         body: userInfo,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["Conversation"],
+    }),
+    getConversation: builder.query({
+      query: (userId) => ({
+        url: `/conversation/${userId}`,
+        method: "GET",
+      }),
+      providesTags: ["Conversation"],
     }),
   }),
 });
@@ -30,4 +37,5 @@ export const {
   useGetUserForSingleConversationQuery,
   useGetUserForGroupConversationQuery,
   useCreateConversationMutation,
+  useGetConversationQuery
 } = userApi;
