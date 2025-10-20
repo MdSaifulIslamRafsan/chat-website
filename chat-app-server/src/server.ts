@@ -8,38 +8,41 @@ const port = config.port || 5000;
 
 // Initialize Socket.io
 const server = createServer(app);
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: ["http://localhost:5173"],
     credentials: true,
   },
 });
 
-const onlineUsers = new Map<string, string>();
+const onlineUsers = new Map<string, Set<string>>();
 
 // Socket.io connections
 io.on("connection", (socket) => {
   console.log("✅ A user connected:", socket.id);
-  // Step 1: Save userId in the socket instance
+  
   socket.on("userId", async (id) => {
     socket.userId = id;
     await User.findByIdAndUpdate(id, { isActive: true });
-    onlineUsers.set(id, socket.id);
-    console.log("Online Users:", Array.from(onlineUsers.keys()));
+    if (!onlineUsers.has(id)) onlineUsers.set(id, new Set());
+    onlineUsers.get(id)?.add(socket.id);
+    socket.join(id);
     io.emit("update_online_users", Array.from(onlineUsers.keys()));
   });
   socket.on("disconnect", async () => {
     console.log("❌ A user disconnected:", socket.id);
-    for (const [userId, sId] of onlineUsers.entries()) {
-      if (sId === socket.id) {
-        onlineUsers.delete(userId);
+    const id = socket.userId;
+    if (!id) return;
 
-        await User.findByIdAndUpdate(socket.userId, {
+    const userSockets = onlineUsers.get(id);
+    if (userSockets) {
+      userSockets.delete(socket.id);
+      if (userSockets.size === 0) {
+        onlineUsers.delete(id);
+        await User.findByIdAndUpdate(id, {
           isActive: false,
           lastSeen: new Date(),
         });
-
-        break;
       }
     }
 
