@@ -8,3 +8,4 @@ export interface TMessage {
   isDeleted: boolean;
   deletedBy: Types.ObjectId[];
 }
+
