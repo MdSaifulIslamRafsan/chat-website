@@ -1,6 +1,6 @@
 import type { TConversation } from "../../Types/conversationTypes";
 
-// Helper function to get group display name
+
 export const getGroupDisplayName = (
   conversation: TConversation,
   id: string
@@ -13,6 +13,7 @@ export const getGroupDisplayName = (
   const otherParticipants = conversation.participants.filter(
     (participant) => participant._id !== id
   );
+  console.log("otherParticipants:", conversation);
 
   if (otherParticipants.length === 0) {
     return "Empty Group";

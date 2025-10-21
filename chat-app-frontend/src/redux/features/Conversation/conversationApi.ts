@@ -1,6 +1,6 @@
 import { baseApi } from "../../api/baseApi";
 
-const userApi = baseApi.injectEndpoints({
+export const conversationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getUserForSingleConversation: builder.query({
       query: (userId) => ({
@@ -38,4 +38,4 @@ export const {
   useGetUserForGroupConversationQuery,
   useCreateConversationMutation,
   useGetConversationQuery
-} = userApi;
+} = conversationApi;

@@ -3,6 +3,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { baseApi } from "./api/baseApi";
 import layoutReducer from "./features/layoutSlice";
 import authReducer from "./features/auth/authSlice";
+import conversationReducer from "./features/Conversation/conversationSlice";
 
 import {
   persistStore,
@@ -25,6 +26,7 @@ export const store = configureStore({
   reducer: {
     auth: persistedReducer,
     layout: layoutReducer,
+    conversation: conversationReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
 
