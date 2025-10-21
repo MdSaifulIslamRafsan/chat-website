@@ -1,6 +1,10 @@
 export interface TMessage {
-  id: string;
+  _id: string;
   text: string;
-  sender: "me" | "other";
+  sender:{
+    _id: string;
+    name: string;
+    avatar: string;
+  }
   time: string;
 }

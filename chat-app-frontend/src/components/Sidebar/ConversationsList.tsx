@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 import type { TConversation } from "../../Types/conversationTypes";
 import { Badge } from "../ui/badge";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { showOnlyChat } from "../../redux/features/layoutSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useGetConversationQuery } from "../../redux/features/Conversation/conversationApi";
@@ -20,6 +20,8 @@ const ConversationsList = ({
   const dispatch = useAppDispatch();
   const { data, isLoading } = useGetConversationQuery(id);
 
+  const params = useParams();
+
   const conversations = useAppSelector(
     (state) => state.conversation.conversations
   );
@@ -29,7 +31,7 @@ const ConversationsList = ({
       dispatch(setConversations(data.data));
     }
   }, [data, dispatch]);
-  
+
   const handleUserClick = useCallback(() => {
     dispatch(showOnlyChat());
   }, [dispatch]);
@@ -53,7 +55,9 @@ const ConversationsList = ({
                 to={`/${conv?._id}`}
                 key={conv?._id}
                 onClick={handleUserClick}
-                className="flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted transition"
+                className={`flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted transition ${
+                  params.id === conv._id ? "bg-secondary" : ""
+                }`}
               >
                 <div className="flex gap-3 items-center">
                   <Avatar>
@@ -92,7 +96,9 @@ const ConversationsList = ({
               to={`/${conv?._id}`}
               key={conv?._id}
               onClick={handleUserClick}
-              className="flex justify-between items-center gap-3 p-3 rounded-xl hover:bg-muted transition"
+              className={`flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted transition ${
+                params.id === conv._id ? "bg-secondary" : ""
+              }`}
             >
               <div className="flex items-center gap-3">
                 <div className="relative">

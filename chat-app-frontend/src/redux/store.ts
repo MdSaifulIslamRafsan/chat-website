@@ -4,6 +4,7 @@ import { baseApi } from "./api/baseApi";
 import layoutReducer from "./features/layoutSlice";
 import authReducer from "./features/auth/authSlice";
 import conversationReducer from "./features/Conversation/conversationSlice";
+import messageReducer from "./features/message/messageSlice";
 
 import {
   persistStore,
@@ -27,6 +28,7 @@ export const store = configureStore({
     auth: persistedReducer,
     layout: layoutReducer,
     conversation: conversationReducer,
+    message: messageReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
 

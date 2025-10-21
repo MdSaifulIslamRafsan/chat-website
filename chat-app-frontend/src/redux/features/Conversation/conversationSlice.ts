@@ -1,4 +1,4 @@
-// conversationSlice.ts
+
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { TConversation } from "../../../Types/conversationTypes";
 
@@ -19,7 +19,7 @@ const conversationSlice = createSlice({
       const exists = state.conversations.find(
         (c) => c._id === action.payload._id
       );
-      if (!exists) state.conversations.push(action.payload);
+      if (!exists) state.conversations.unshift(action.payload);
     },
   },
 });

@@ -8,24 +8,38 @@ import CTextarea from "../form/CTextarea";
 import type { FieldValues, SubmitHandler } from "react-hook-form";
 import EmojiPickerWithForm from "./EmojiPickerWithForm";
 
-const ChatRoomInputBox = () => {
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  // const formRef = useRef<HTMLFormElement>(null);
+import { toast } from "sonner";
+import type { TErrorMessage } from "../../Types/errorMessageTypes";
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+import { useCreateMessageMutation } from "../../redux/features/message/messageApi";
+
+const ChatRoomInputBox = ({
+  id,
+  conversationId,
+}: {
+  id: string;
+  conversationId: string;
+}) => {
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const [createMessage] = useCreateMessageMutation();
+
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     console.log("Submitted data:", data);
     if (!data.message?.trim()) return;
 
-    const newMsg = {
-      id: Date.now().toString(),
-      text: data.message,
-      sender: "me",
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-    console.log(newMsg);
+    try {
+      await createMessage({
+        conversationId,
+        text: data.message,
+        sender: id,
+      }).unwrap();
+    } catch (error: unknown) {
+      toast.error(`something went wrong ${(error as TErrorMessage).message}`, {
+        duration: 2000,
+      });
+    }
+
     setShowEmojiPicker(false);
   };
 
@@ -47,7 +61,7 @@ const ChatRoomInputBox = () => {
             variant="ghost"
             size="icon"
             type="button"
-              data-emoji-button
+            data-emoji-button
             onClick={() => setShowEmojiPicker((prev) => !prev)}
             className="absolute right-2 top-1/2 -translate-y-1/2"
           >
