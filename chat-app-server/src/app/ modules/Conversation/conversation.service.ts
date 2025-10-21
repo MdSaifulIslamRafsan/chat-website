@@ -8,7 +8,7 @@ import { io } from "../../../server";
 import { Document } from "mongoose";
 
 const createConversationIntoDB = async (data: TConversation) => {
-  const { participants, isGroup, groupName } = data;
+  const { participants, isGroup, groupAdmin } = data;
   let newConversation: Document & TConversation;
   if (!participants || participants.length < 2) {
     throw new AppError(
@@ -39,18 +39,21 @@ const createConversationIntoDB = async (data: TConversation) => {
 
     return newConversation;
   }
-  if (!groupName) {
+  if (!groupAdmin) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      "Group name is required for group chat."
+      "Group admin is required for group chat."
     );
   }
   newConversation = await Conversation.create({
     ...data,
     isGroup: true,
   });
-  participants.forEach((userId) => {
-    io.to(userId.toString()).emit("new_conversation", newConversation);
+  participants.forEach(async (userId) => {
+    io.to(userId.toString()).emit(
+      "new_conversation",
+      await newConversation.populate("participants", "_id name avatar")
+    );
   });
 
   return newConversation;

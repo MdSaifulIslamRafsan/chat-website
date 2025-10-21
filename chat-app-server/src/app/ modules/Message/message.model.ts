@@ -12,13 +12,11 @@ const messageSchema = new mongoose.Schema<TMessage>(
       type: String,
       required: true,
     },
-    conversationId: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Conversation",
-        required: true,
-      },
-    ],
+    conversationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Conversation",
+      required: true,
+    },
 
     attachments: [
       {

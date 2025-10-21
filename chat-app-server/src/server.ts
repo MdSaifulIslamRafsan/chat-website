@@ -22,6 +22,7 @@ io.on("connection", (socket) => {
   console.log("✅ A user connected:", socket.id);
   
   socket.on("userId", async (id) => {
+    console.log("User ID received via socket:", id);
     socket.userId = id;
     await User.findByIdAndUpdate(id, { isActive: true });
     if (!onlineUsers.has(id)) onlineUsers.set(id, new Set());

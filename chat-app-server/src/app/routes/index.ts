@@ -2,6 +2,7 @@ import express from "express";
 import { UserRoutes } from "../ modules/User/user.route";
 import { ConversationRoutes } from "../ modules/Conversation/conversation.route";
 import { AuthRoutes } from "../ modules/Auth/auth.router";
+import { MessageRoutes } from "../ modules/Message/message.route";
 
 const router = express.Router();
 
@@ -18,6 +19,10 @@ const modulesRoutes = [
     path: "/auth",
     route: AuthRoutes,
   },
+  {
+    path: "/message",
+    route: MessageRoutes,
+  }
 ];
 
 modulesRoutes.forEach((route) => router.use(route.path, route.route));
