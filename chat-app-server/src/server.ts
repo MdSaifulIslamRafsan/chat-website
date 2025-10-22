@@ -10,7 +10,10 @@ const port = config.port || 5000;
 const server = createServer(app);
 export const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://chat-website-phi-pearl.vercel.app",
+    ],
     credentials: true,
   },
 });
@@ -20,7 +23,7 @@ const onlineUsers = new Map<string, Set<string>>();
 // Socket.io connections
 io.on("connection", (socket) => {
   console.log("✅ A user connected:", socket.id);
-  
+
   socket.on("userId", async (id) => {
     console.log("User ID received via socket:", id);
     socket.userId = id;

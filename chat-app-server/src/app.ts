@@ -9,7 +9,15 @@ import router from "./app/routes";
 const app: Application = express();
 
 // Middleware
-app.use(cors({ origin: ["http://localhost:5173"], credentials: true }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://chat-website-phi-pearl.vercel.app",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
