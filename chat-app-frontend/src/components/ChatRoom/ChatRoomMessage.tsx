@@ -15,12 +15,13 @@ const ChatRoomMessage = ({
 
   const { data, isLoading } = useGetMessagesQuery(conversationId);
   const messages = useAppSelector((state) => state.message.messages);
+  console.log({ messages });
 
   useEffect(() => {
     if (data?.data) {
       dispatch(setMessages(data.data));
     }
-  }, [messages, data?.data, dispatch]);
+  }, [data, dispatch]);
 
   if (isLoading) {
     return "loading...";

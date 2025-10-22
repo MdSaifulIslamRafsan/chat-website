@@ -20,7 +20,7 @@ const messageSlice = createSlice({
       const exists = state.messages.find(
         (c) => c._id === action.payload._id
       );
-      if (!exists) state.messages.unshift(action.payload);
+      if (!exists) state.messages.push(action.payload);
     },
   },
 });

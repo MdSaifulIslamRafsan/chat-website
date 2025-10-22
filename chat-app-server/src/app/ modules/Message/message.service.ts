@@ -5,7 +5,18 @@ import { io } from "../../../server";
 
 const createMessageIntoDB = async (messageData: TMessage) => {
   const newMessage = await Message.create(messageData);
-  io.to(newMessage.conversationId.toString()).emit("new_message", newMessage);
+  const populatedMessage = await newMessage.populate([
+    { path: "sender", select: "name avatar" },
+    { path: "conversationId", select: "participants" },
+  ]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const participants = (populatedMessage?.conversationId as any)?.participants;
+  if (Array.isArray(participants)) {
+    participants.forEach((userId) => {
+      io.to(userId.toString()).emit("new_message", populatedMessage);
+    });
+  }
 
   return newMessage;
 };

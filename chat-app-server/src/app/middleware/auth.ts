@@ -1,7 +1,7 @@
 import catchAsync from "../utils/catchAsync";
 import { NextFunction, Request, Response } from "express";
 import config from "../config";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload, TokenExpiredError } from "jsonwebtoken";
 import AppError from "../errors/AppError";
 import httpStatus from "http-status";
 import { User } from "../ modules/User/user.model";
@@ -14,10 +14,15 @@ const auth = () => {
       throw new AppError(httpStatus.UNAUTHORIZED, "Invalid authorization");
     }
 
-    const decoded = jwt.verify(
-      token,
-      config.access_token as string
-    ) as JwtPayload;
+    let decoded: JwtPayload;
+    try {
+      decoded = jwt.verify(token, config.access_token as string) as JwtPayload;
+    } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "Access token expired");
+      }
+      throw new AppError(httpStatus.UNAUTHORIZED, "Invalid token");
+    }
 
     const { id, iat } = decoded;
     const user = await User.findById(id);
