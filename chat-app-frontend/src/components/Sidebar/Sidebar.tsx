@@ -102,6 +102,7 @@ const Sidebar = () => {
       ></SidebarHeader>
 
       {/* Conversations List */}
+      
       <ConversationsList
         id={user?.id as string}
         isUsersConnected={isUsersConnected}

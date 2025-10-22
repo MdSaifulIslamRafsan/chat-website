@@ -42,12 +42,13 @@ const ConversationsList = ({
     return <ConversationsListSkeleton></ConversationsListSkeleton>;
   }
   return (
-    <div className="flex-1 overflow-y-auto p-3 space-y-2">
+    <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[calc(100vh-10rem)] p-4 space-y-3 bg-muted/10">
       {conversations?.length === 0 ? (
         <div className="text-center text-muted-foreground py-8">
           No conversations yet
         </div>
       ) : (
+        
         conversations.map((conv: TConversation) => {
           if (conv?.isGroup) {
             const groupDisplayName = getGroupDisplayName(conv, id as string);

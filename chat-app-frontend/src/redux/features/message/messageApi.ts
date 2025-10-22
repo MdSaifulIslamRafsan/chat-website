@@ -8,7 +8,6 @@ export const conversationApi = baseApi.injectEndpoints({
         method: "POST",
         body: userInfo,
       }),
-      invalidatesTags: ["Message"],
     }),
     getMessages: builder.query({
       query: (conversationId) => ({
