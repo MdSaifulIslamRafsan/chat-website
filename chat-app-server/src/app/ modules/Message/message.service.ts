@@ -18,6 +18,8 @@ const createMessageIntoDB = async (messageData: TMessage) => {
     });
   }
 
+  console.log(newMessage)
+
   return newMessage;
 };
 
