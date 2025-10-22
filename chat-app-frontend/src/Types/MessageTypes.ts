@@ -6,5 +6,5 @@ export interface TMessage {
     name: string;
     avatar: string;
   }
-  time: string;
+  createdAt: string;
 }

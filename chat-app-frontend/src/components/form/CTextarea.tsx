@@ -30,7 +30,7 @@ const CTextarea = ({ fieldName, label, placeholder, required }: TCTextarea) => {
               id={fieldName}
               placeholder={placeholder}
               rows={1}
-              className="flex-1 w-full resize-none overflow-y-auto custom-scrollbar h-10 max-h-24 px-3 py-2 rounded-md border border-input bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex-1 w-full resize-none overflow-y-auto custom-scrollbar h-10 max-h-24 px-3 py-2 rounded-md border border-input bg-background focus-visible:outline-none "
             />
           </FormControl>
           <FormMessage />

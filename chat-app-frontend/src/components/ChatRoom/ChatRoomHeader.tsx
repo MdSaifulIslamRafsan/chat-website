@@ -1,15 +1,36 @@
 import { Button } from "../ui/button";
 import { ArrowLeft, Phone, Video } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { useAppDispatch } from "../../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { showOnlySidebar } from "../../redux/features/layoutSlice";
+import { useParams } from "react-router-dom";
+import { getGroupDisplayName } from "../../utils/helperFunction";
+import type { TConversation } from "../../Types/conversationTypes";
+import useSocketEvents from "../../hooks/useSocketEvents";
+import formatLastSeen from "../../utils/formatLastSeen";
+import { cn } from "../../lib/utils";
 
 const ChatRoomHeader = () => {
   const dispatch = useAppDispatch();
-
+  const { user } = useAppSelector((state) => state.auth);
+  const { isUsersConnected } = useSocketEvents({ id: user?.id as string });
+  const { id } = useParams();
+  const conversations = useAppSelector(
+    (state) => state.conversation.conversations
+  );
+  const currentConversation = conversations?.find((conv) => conv?._id === id);
+  console.log(currentConversation);
   const handleUserClick = () => {
     dispatch(showOnlySidebar());
   };
+  const otherUser = currentConversation?.participants?.find(
+    (participant) => participant?._id !== user?.id
+  );
+  const groupDisplayName = getGroupDisplayName(
+    currentConversation as TConversation,
+    id as string
+  );
+
   return (
     <div className="flex items-center justify-between border-b border-border p-4">
       <div className="flex items-center gap-2">
@@ -21,16 +42,38 @@ const ChatRoomHeader = () => {
         >
           <ArrowLeft className="w-5 h-5"></ArrowLeft>
         </Button>
-        <Avatar>
-          <AvatarImage src="https://i.pravatar.cc/150?img=5" />
-          <AvatarFallback>G</AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          {currentConversation?.isGroup ? (
+            <Avatar>
+              <AvatarImage src="https://i.pravatar.cc/150?img=5" />
+              <AvatarFallback>G</AvatarFallback>
+            </Avatar>
+          ) : (
+            <Avatar>
+              <AvatarImage src={otherUser?.avatar} />
+              <AvatarFallback>{otherUser?.name?.slice(0, 1)}</AvatarFallback>
+            </Avatar>
+          )}
+          <span
+            className={cn(
+              "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background",
+              isUsersConnected.includes(otherUser?._id as string)
+                ? "bg-green-500"
+                : "bg-gray-400"
+            )}
+          />
+        </div>
+
         <div>
           <h2 className="font-semibold md:text-lg line-clamp-1">
-            Yong Tonghyon
+            {currentConversation?.isGroup ? groupDisplayName : otherUser?.name}
           </h2>
-          <p className="text-[11px] md:text-xs text-muted-foreground">
-            Last seen recently
+          <p className="text-xs md:text-sm text-muted-foreground">
+            {currentConversation?.isGroup
+              ? "Online"
+              : isUsersConnected?.includes(otherUser?._id as string)
+              ? "online"
+              : formatLastSeen(otherUser?.lastSeen as string)}
           </p>
         </div>
       </div>

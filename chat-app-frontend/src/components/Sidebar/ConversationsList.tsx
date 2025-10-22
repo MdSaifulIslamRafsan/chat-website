@@ -5,10 +5,11 @@ import { Link, useParams } from "react-router-dom";
 import { showOnlyChat } from "../../redux/features/layoutSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useGetConversationQuery } from "../../redux/features/Conversation/conversationApi";
-import { getGroupDisplayName } from "./helperFunction";
+
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { cn } from "../../lib/utils";
 import { setConversations } from "../../redux/features/Conversation/conversationSlice";
+import { getGroupDisplayName } from "../../utils/helperFunction";
 
 const ConversationsList = ({
   id,
