@@ -17,7 +17,7 @@ const getMessagesIntoDB = async (conversationId: string) => {
 
   const messages = await Message.find({ conversationId }).populate(
     "sender",
-    "name email avatar"
+    "name avatar"
   );
   return messages;
 };
