@@ -5,6 +5,7 @@ import { setMessages } from "../../redux/features/message/messageSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import FormateDate from "../../utils/FormateDate";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import ChatRoomSkeleton from "../Skeleton/ChatRoomMessageSkeleton";
 
 const ChatRoomMessage = ({
   id,
@@ -35,11 +36,7 @@ const ChatRoomMessage = ({
   }, [messages]);
 
   if (isLoading) {
-    return (
-      <div className="h-full">
-        <p className="text-center text-muted-foreground">Loading messages...</p>
-      </div>
-    );
+    return <ChatRoomSkeleton></ChatRoomSkeleton>;
   }
   let lastDateLabel = "";
 

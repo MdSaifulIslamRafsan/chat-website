@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { cn } from "../../lib/utils";
 import { setConversations } from "../../redux/features/Conversation/conversationSlice";
 import { getGroupDisplayName } from "../../utils/helperFunction";
+import ConversationsListSkeleton from "../Skeleton/ConversationsListSkeleton";
 
 const ConversationsList = ({
   id,
@@ -38,7 +39,7 @@ const ConversationsList = ({
   }, [dispatch]);
 
   if (isLoading) {
-    return "loading...";
+    return <ConversationsListSkeleton></ConversationsListSkeleton>;
   }
   return (
     <div className="flex-1 overflow-y-auto p-3 space-y-2">
