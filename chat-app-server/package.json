@@ -1,11 +1,11 @@
 {
-  "name": "assignment2",
+  "name": "chat-app-server",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start:prod": "nodemon dist/server.js",
     "start:dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc -w",
+    "build": "tsc",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write .",
