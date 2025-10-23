@@ -8,9 +8,8 @@ const EmojiPickerWithForm = ({
   showEmojiPicker: boolean;
   setShowEmojiPicker: (show: boolean) => void;
 }) => {
-  const { setValue,  getValues } = useFormContext();
+  const { setValue, getValues } = useFormContext();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
 
   // Textarea reference setup
   useEffect(() => {
@@ -20,7 +19,6 @@ const EmojiPickerWithForm = ({
       ) as HTMLTextAreaElement;
     }
   }, [showEmojiPicker]);
-
 
   const handleEmojiClick = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,6 +51,7 @@ const EmojiPickerWithForm = ({
   );
   // Close emoji picker when clicking outside
   useEffect(() => {
+    if (!showEmojiPicker) return;
     const handleClickOutside = (event: MouseEvent) => {
       const emojiPicker = document.querySelector(".EmojiPickerReact");
       const emojiButton = document.querySelector("[data-emoji-button]");

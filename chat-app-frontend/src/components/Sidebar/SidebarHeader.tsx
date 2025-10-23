@@ -26,12 +26,14 @@ import { socket } from "../../utils/socket";
 interface SidebarHeaderProps {
   setOpenGroupModal: React.Dispatch<React.SetStateAction<boolean>>;
   setOpenUserModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   isConnected: boolean;
 }
 
 const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   setOpenGroupModal,
   setOpenUserModal,
+  setSearchTerm,
   isConnected,
 }) => {
   const { showSidebar } = useAppSelector((state) => state.layout);
@@ -42,6 +44,16 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({
     dispatch(logout());
     toast.success("logout successfully");
   };
+
+  const handelSingleUserModal = () => {
+    setOpenUserModal(true);
+    setSearchTerm("");
+  };
+  const handleGroupUserModal = () => {
+    setOpenGroupModal(true);
+    setSearchTerm("");
+  };
+
   return (
     <div className="p-5 border-b border-border flex justify-between items-center">
       <div className="relative">
@@ -63,13 +75,13 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => setOpenUserModal(true)}>
+                <DropdownMenuItem onClick={handelSingleUserModal}>
                   <Button size="icon" variant="ghost">
                     <UserRound />
                   </Button>
                   Single Chat
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setOpenGroupModal(true)}>
+                <DropdownMenuItem onClick={handleGroupUserModal}>
                   <Button size="icon" variant="ghost">
                     <UsersRound />
                   </Button>

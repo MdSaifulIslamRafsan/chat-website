@@ -21,7 +21,7 @@ export const conversationApi = baseApi.injectEndpoints({
         method: "POST",
         body: userInfo,
       }),
-      invalidatesTags: ["Conversation"],
+      // invalidatesTags: ["Conversation"],
     }),
     getConversation: builder.query({
       query: (userId) => ({

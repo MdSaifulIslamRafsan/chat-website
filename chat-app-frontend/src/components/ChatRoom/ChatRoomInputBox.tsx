@@ -22,10 +22,10 @@ const ChatRoomInputBox = ({
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  const [createMessage] = useCreateMessageMutation();
+  const [createMessage, { isLoading }] = useCreateMessageMutation();
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    console.log("Submitted data:", data);
+    if (isLoading) return;
     if (!data.message?.trim()) return;
 
     try {

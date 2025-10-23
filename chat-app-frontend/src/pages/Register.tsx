@@ -24,7 +24,7 @@ const Register = () => {
     const toastId = toast.loading("logging in...");
     try {
       const res = await register(data).unwrap();
-      console.log(res);
+    
       if (res?.success) {
         toast.success(res?.message, {
           id: toastId,

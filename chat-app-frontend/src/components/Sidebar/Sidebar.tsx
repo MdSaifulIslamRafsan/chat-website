@@ -19,12 +19,15 @@ import type { TErrorMessage } from "../../Types/errorMessageTypes";
 
 import useSocketEvents from "../../hooks/useSocketEvents";
 import ConversationsList from "./ConversationsList";
+import { Input } from "../ui/input";
 
 const Sidebar = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { isConnected, isUsersConnected } = useSocketEvents({
     id: user?.id as string,
   });
+  const [groupName, setGroupName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const {
     data: userForSingleConversation,
     isLoading: loadingForSingleConversation,
@@ -54,6 +57,7 @@ const Sidebar = () => {
       });
       setSelectedGroupUsers([]);
       setOpenUserModal(false);
+      setSearchTerm("");
     } catch (error) {
       toast.error(`something went wrong ${(error as TErrorMessage).message}`, {
         id: toastId,
@@ -69,7 +73,7 @@ const Sidebar = () => {
       const res = await createConversation({
         participants: [...selectedGroupUsers, user?.id],
         isGroup: true,
-        // groupName: "sa",
+        groupName,
         groupAdmin: [user?.id],
       }).unwrap();
       toast.success(res?.message || `User login successfully`, {
@@ -78,6 +82,8 @@ const Sidebar = () => {
       });
       setSelectedGroupUsers([]);
       setOpenGroupModal(false);
+      setGroupName("");
+      setSearchTerm("");
     } catch (error) {
       toast.error(`something went wrong ${(error as TErrorMessage).message}`, {
         id: toastId,
@@ -91,6 +97,14 @@ const Sidebar = () => {
       prev.includes(id) ? prev.filter((u) => u !== id) : [...prev, id]
     );
   };
+  const filteredForGroupUsers =
+    userForGroupConversation?.data?.filter((u: createConversationUserTypes) =>
+      u.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
+  const filteredForSingleUsers =
+    userForSingleConversation?.data?.filter((u: createConversationUserTypes) =>
+      u.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
 
   return (
     <div className="w-full min-h-[calc(100vh-4rem)] h-full border-r border-border flex flex-col">
@@ -99,70 +113,81 @@ const Sidebar = () => {
         isConnected={isConnected}
         setOpenGroupModal={setOpenGroupModal}
         setOpenUserModal={setOpenUserModal}
+        setSearchTerm={setSearchTerm}
       ></SidebarHeader>
 
       {/* Conversations List */}
-      
+
       <ConversationsList
         id={user?.id as string}
         isUsersConnected={isUsersConnected}
       ></ConversationsList>
 
-      {loadingForSingleConversation ? (
-        "Loading"
-      ) : (
-        <Modal
-          title="Start a New Chat"
-          description="Select one user to start a 1-to-1 conversation"
-          open={openUserModal}
-          onOpenChange={setOpenUserModal}
-        >
-          <div className="space-y-2 max-h-[300px] custom-scrollbar overflow-y-auto">
-            {userForSingleConversation?.data?.length > 0 ? (
-              userForSingleConversation?.data?.map(
-                (user: createConversationUserTypes) => (
-                  <div
-                    key={user._id}
-                    onClick={() => setSelectedGroupUsers([user?._id])}
-                    className={cn(
-                      "flex items-center gap-3 p-2 rounded-xl border cursor-pointer transition",
-                      selectedGroupUsers.includes(user?._id)
-                        ? "bg-primary/10 border-primary"
-                        : "hover:bg-muted border-transparent"
-                    )}
-                  >
-                    <Avatar>
-                      <AvatarImage src={user?.avatar} />
-                      <AvatarFallback>
-                        {user.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{user?.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {user?.email}
-                      </p>
+      <Modal
+        title="Start a New Chat"
+        description="Select one user to start a 1-to-1 conversation"
+        open={openUserModal}
+        onOpenChange={setOpenUserModal}
+      >
+        {loadingForSingleConversation ? (
+          "Loading"
+        ) : (
+          <div className="">
+            <div className="space-y-2 mb-3">
+              <Input
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2 max-h-[300px] custom-scrollbar overflow-y-auto">
+              {filteredForSingleUsers?.length > 0 ? (
+                filteredForSingleUsers?.map(
+                  (user: createConversationUserTypes) => (
+                    <div
+                      key={user._id}
+                      onClick={() => setSelectedGroupUsers([user?._id])}
+                      className={cn(
+                        "flex items-center gap-3 p-2 rounded-xl border cursor-pointer transition",
+                        selectedGroupUsers.includes(user?._id)
+                          ? "bg-primary/10 border-primary"
+                          : "hover:bg-muted border-transparent"
+                      )}
+                    >
+                      <Avatar>
+                        <AvatarImage src={user?.avatar} />
+                        <AvatarFallback>
+                          {user.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{user?.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {user?.email}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )
                 )
-              )
-            ) : (
-              <p className=" text-muted-foreground text-center py-4">
-                No users found to start a conversation.
-              </p>
-            )}
-          </div>
+              ) : (
+                <p className=" text-muted-foreground text-center py-4">
+                  No users found to start a conversation.
+                </p>
+              )}
+            </div>
 
-          {selectedGroupUsers.length > 0 &&
-            userForSingleConversation?.data?.length > 0 && (
-              <div className="mt-4 flex justify-end">
-                <Button onClick={handleCreateChat}>
-                  {createConversationLoading ? "Loading" : "Start Chat"}
-                </Button>
-              </div>
-            )}
-        </Modal>
-      )}
+            {selectedGroupUsers.length > 0 &&
+              userForSingleConversation?.data?.length > 0 && (
+                <div className="mt-4 flex justify-end">
+                  <Button onClick={handleCreateChat}>
+                    {createConversationLoading ? "Loading" : "Start Chat"}
+                  </Button>
+                </div>
+              )}
+          </div>
+        )}
+      </Modal>
+
       {/*  Single Chat Modal */}
 
       {/* Group Chat Modal */}
@@ -175,9 +200,26 @@ const Sidebar = () => {
           open={openGroupModal}
           onOpenChange={setOpenGroupModal}
         >
+          <div className="space-y-2 mb-3">
+            <Input
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2 mb-3">
+            <label className="text-sm  font-medium">Group Name</label>
+            <Input
+              className="mt-1"
+              placeholder="Enter group name..."
+              value={groupName}
+              onChange={(e) => setGroupName(e.target.value)}
+            />
+          </div>
+
           <div className="space-y-2 max-h-[300px] custom-scrollbar overflow-y-auto">
-            {userForGroupConversation?.data.length > 0 ? (
-              userForGroupConversation?.data?.map(
+            {filteredForGroupUsers?.length > 0 ? (
+              filteredForGroupUsers?.map(
                 (user: createConversationUserTypes) => (
                   <div
                     key={user?._id}
