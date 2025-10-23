@@ -25,13 +25,19 @@ io.on("connection", (socket) => {
   console.log("✅ A user connected:", socket.id);
 
   socket.on("userId", async (id) => {
-    console.log("User ID received via socket:", id);
     socket.userId = id;
     await User.findByIdAndUpdate(id, { isActive: true });
     if (!onlineUsers.has(id)) onlineUsers.set(id, new Set());
     onlineUsers.get(id)?.add(socket.id);
     socket.join(id);
     io.emit("update_online_users", Array.from(onlineUsers.keys()));
+  });
+  socket.on("typing", async ({ userId, conversationId }) => {
+    console.log("typing", { userId, conversationId });
+     socket.to(conversationId).emit("typing_users", [userId]);
+  });
+  socket.on("stop_typing", ({  conversationId }) => {
+    socket.to(conversationId).emit("typing_users", []);
   });
   socket.on("disconnect", async () => {
     console.log("❌ A user disconnected:", socket.id);
