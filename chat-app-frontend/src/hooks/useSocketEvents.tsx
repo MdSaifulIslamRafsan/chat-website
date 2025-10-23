@@ -1,16 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { socket } from "../utils/socket";
 import type { TConversation } from "../Types/conversationTypes";
 import { useAppDispatch } from "../redux/hooks";
 import { addConversation } from "../redux/features/Conversation/conversationSlice";
 import type { TMessage } from "../Types/MessageTypes";
 import { addMessage } from "../redux/features/message/messageSlice";
+import { debounce } from "lodash";
 
-const useSocketEvents = ({ id }: { id: string }) => {
+const useSocketEvents = ({
+  id,
+  participantIds,
+}: {
+  id: string;
+  participantIds?: string[];
+}) => {
   const dispatch = useAppDispatch();
 
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [isUsersConnected, setIsUsersConnected] = useState<string[]>([]);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
 
   useEffect(() => {
     function onConnect() {
@@ -27,34 +35,14 @@ const useSocketEvents = ({ id }: { id: string }) => {
     }
 
     function getConversation(newConversation: TConversation) {
-      console.log("New conversation received via socket:", newConversation);
       dispatch(addConversation(newConversation));
-
-      // RTK Query cache direct update
-      //   conversationApi.util.updateQueryData("getConversation", id, (draft) => {
-      //     draft.data = [newConversation, ...draft.data];
-      //   });
-      //   conversationApi.util.invalidateTags(["Conversation"]);
-      //   conversationApi.util.updateQueryData("getConversation", id, (draft) => {
-      //     console.log("Current draft data before update:", draft.data);
-      //     const exists = draft.data.some(
-      //       (c: TConversation) => c._id === newConversation._id
-      //     );
-      //     console.log({ exists });
-      //     if (!exists) {
-      //       console.log("Updating cache with new conversation:", [
-      //         ...draft.data,
-      //         newConversation,
-      //       ]);
-      //       draft.data = [...draft.data, newConversation];
-      //       console.log("Updating cache with new conversation:", draft.data);
-      //     }
-      //   });
     }
 
     function getMessage(message: TMessage) {
-      console.log("New message received via socket:", message);
       dispatch(addMessage(message));
+    }
+    function getTypingUsers(users: string[]) {
+      console.log({ users });
     }
 
     socket.on("connect", onConnect);
@@ -62,6 +50,8 @@ const useSocketEvents = ({ id }: { id: string }) => {
     socket.on("update_online_users", getOnlineUser);
     socket.on("new_conversation", getConversation);
     socket.on("new_message", getMessage);
+    socket.on("typing_users", getTypingUsers);
+
     if (socket.connected) {
       onConnect();
     }
@@ -72,9 +62,39 @@ const useSocketEvents = ({ id }: { id: string }) => {
       socket.off("update_online_users", getOnlineUser);
       socket.off("new_conversation", getConversation);
       socket.off("new_message", getMessage);
+      socket.off("typing_users", getTypingUsers);
     };
-  }, [id, dispatch]);
-  return { isConnected, isUsersConnected };
+  }, [id, dispatch, participantIds]);
+
+  const emitTyping = useMemo(
+    () =>
+      debounce(
+        () => socket.emit("typing", { userId: id, participantIds }),
+        300
+      ),
+    [id, participantIds]
+  );
+  const emitStopTyping = useMemo(
+    () =>
+      debounce(
+        () => socket.emit("stop_typing", { userId: id, participantIds }),
+        2000
+      ),
+    [id, participantIds]
+  );
+  useEffect(() => {
+    return () => {
+      emitTyping.cancel?.();
+      emitStopTyping.cancel?.();
+    };
+  }, [emitTyping, emitStopTyping]);
+  return {
+    isConnected,
+    isUsersConnected,
+    typingUsers,
+    emitTyping,
+    emitStopTyping,
+  };
 };
 
 export default useSocketEvents;

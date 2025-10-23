@@ -10,9 +10,11 @@ import ChatRoomSkeleton from "../Skeleton/ChatRoomMessageSkeleton";
 const ChatRoomMessage = ({
   id,
   conversationId,
+  typingUsers,
 }: {
   id: string;
   conversationId: string;
+  typingUsers: string[];
 }) => {
   const dispatch = useAppDispatch();
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
@@ -87,7 +89,7 @@ const ChatRoomMessage = ({
                   </p>
                   <div
                     className={cn(
-                      "rounded-2xl px-4 py-2 text-sm shadow-sm",
+                      "rounded-2xl px-4 py-2 text-sm shadow-sm whitespace-pre-line",
                       msg?.sender?._id === id
                         ? "bg-primary text-primary-foreground rounded-tr-none"
                         : "bg-muted text-foreground rounded-tl-none"

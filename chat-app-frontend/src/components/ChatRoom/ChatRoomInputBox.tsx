@@ -16,14 +16,17 @@ import { useCreateMessageMutation } from "../../redux/features/message/messageAp
 const ChatRoomInputBox = ({
   id,
   conversationId,
+  emitTyping,
+  emitStopTyping,
 }: {
   id: string;
   conversationId: string;
+  emitTyping?: (event?: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  emitStopTyping?: (event?: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const [createMessage, { isLoading }] = useCreateMessageMutation();
-
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     if (isLoading) return;
     if (!data.message?.trim()) return;
@@ -55,7 +58,12 @@ const ChatRoomInputBox = ({
         defaultValues={{ message: "" }}
       >
         <div className="flex-1 relative w-full">
-          <CTextarea fieldName="message" placeholder="Write a message..." />
+          <CTextarea
+            emitTyping={emitTyping}
+            emitStopTyping={emitStopTyping}
+            fieldName="message"
+            placeholder="Write a message..."
+          />
 
           <Button
             variant="ghost"
