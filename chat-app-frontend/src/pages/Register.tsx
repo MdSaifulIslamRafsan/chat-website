@@ -21,7 +21,7 @@ const Register = () => {
   const navigate = useNavigate();
   const [register, { isLoading }] = useRegisterMutation();
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    const toastId = toast.loading("logging in...");
+    const toastId = toast.loading("registering...");
     try {
       const res = await register(data).unwrap();
     
