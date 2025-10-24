@@ -9,10 +9,16 @@ import {
 } from "../ui/form";
 import type { TCTextarea } from "../../Types/CTextareaTypes";
 
-const CTextarea = ({ fieldName, label, placeholder, required }: TCTextarea) => {
+const CTextarea = ({
+  fieldName,
+  label,
+  placeholder,
+  required,
+  emitTyping,
+  emitStopTyping,
+}: TCTextarea) => {
   const { control } = useFormContext();
 
- 
   // const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   return (
@@ -37,6 +43,8 @@ const CTextarea = ({ fieldName, label, placeholder, required }: TCTextarea) => {
                   const form = e.currentTarget.closest("form");
                   if (form) form.requestSubmit();
                 }
+                emitTyping?.();
+                emitStopTyping?.();
               }}
               rows={1}
               className="flex-1 w-full resize-none overflow-y-auto custom-scrollbar h-10 max-h-24 pl-3 pr-10 py-2 rounded-md border border-input bg-background focus-visible:outline-none "

@@ -9,17 +9,14 @@ import type { TConversation } from "../../Types/conversationTypes";
 import useSocketEvents from "../../hooks/useSocketEvents";
 import formatLastSeen from "../../utils/formatLastSeen";
 import { cn } from "../../lib/utils";
+import useCurrentConversation from "../../hooks/useCurrentConversation";
 
 const ChatRoomHeader = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { isUsersConnected } = useSocketEvents({ id: user?.id as string });
   const { id } = useParams();
-  const conversations = useAppSelector(
-    (state) => state.conversation.conversations
-  );
-  const currentConversation = conversations?.find((conv) => conv?._id === id);
-  console.log(currentConversation);
+ const { currentConversation } = useCurrentConversation(id as string);
   const handleUserClick = () => {
     dispatch(showOnlySidebar());
   };
