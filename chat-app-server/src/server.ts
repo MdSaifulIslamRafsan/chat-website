@@ -6,6 +6,12 @@ import { createServer } from "http";
 import { User } from "./app/ modules/User/user.model";
 const port = config.port || 5000;
 
+type TtypingEvent = {
+  userId: string;
+  participantIds: string[];
+  conversationId: string;
+};
+
 // Initialize Socket.io
 const server = createServer(app);
 export const io = new Server(server, {
@@ -19,13 +25,12 @@ export const io = new Server(server, {
 });
 
 const onlineUsers = new Map<string, Set<string>>();
-
+const typingUsersMap = new Map<string, Set<string>>();
 // Socket.io connections
 io.on("connection", (socket) => {
   console.log("✅ A user connected:", socket.id);
 
   socket.on("userId", async (id) => {
-    console.log("User ID received via socket:", id);
     socket.userId = id;
     await User.findByIdAndUpdate(id, { isActive: true });
     if (!onlineUsers.has(id)) onlineUsers.set(id, new Set());
@@ -33,6 +38,45 @@ io.on("connection", (socket) => {
     socket.join(id);
     io.emit("update_online_users", Array.from(onlineUsers.keys()));
   });
+  socket.on(
+    "typing",
+    ({ userId, participantIds, conversationId }: TtypingEvent) => {
+     console.log({ userId, participantIds, conversationId })
+      if (!conversationId) return;
+
+      if (!typingUsersMap.has(conversationId)) {
+        typingUsersMap.set(conversationId, new Set());
+      }
+
+      const set = typingUsersMap.get(conversationId)!;
+      set.add(userId);
+
+      const typingUsers = Array.from(set);
+      participantIds?.forEach((pid) => {
+        io.to(pid).emit("typing_users", typingUsers);
+      });
+    }
+  );
+  socket.on(
+    "stop_typing",
+    ({ userId, participantIds, conversationId }: TtypingEvent) => {
+      if (!conversationId) return;
+
+      if (typingUsersMap.has(conversationId)) {
+        const set = typingUsersMap.get(conversationId)!;
+        set.delete(userId);
+        if (set.size === 0) typingUsersMap.delete(conversationId);
+      }
+
+      const typingUsers = typingUsersMap.has(conversationId)
+        ? Array.from(typingUsersMap.get(conversationId)!)
+        : [];
+
+      participantIds?.forEach((pid) => {
+        io.to(pid).emit("typing_users", typingUsers);
+      });
+    }
+  );
   socket.on("disconnect", async () => {
     console.log("❌ A user disconnected:", socket.id);
     const id = socket.userId;
