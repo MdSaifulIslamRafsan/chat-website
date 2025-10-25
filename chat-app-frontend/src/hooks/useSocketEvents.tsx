@@ -6,17 +6,17 @@ import { addConversation } from "../redux/features/Conversation/conversationSlic
 import type { TMessage } from "../Types/MessageTypes";
 import { addMessage } from "../redux/features/message/messageSlice";
 import { debounce } from "lodash";
+import { useParams } from "react-router-dom";
 
 const useSocketEvents = ({
   id,
-  participantIds,
   conversationId,
 }: {
   id: string;
   conversationId?: string;
-  participantIds?: string[];
 }) => {
   const dispatch = useAppDispatch();
+  const { id: currentConversationId } = useParams();
 
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [isUsersConnected, setIsUsersConnected] = useState<string[]>([]);
@@ -41,7 +41,9 @@ const useSocketEvents = ({
     }
 
     function getMessage(message: TMessage) {
-      dispatch(addMessage(message));
+      if (message.conversationId._id === currentConversationId) {
+        dispatch(addMessage(message));
+      }
     }
     function getTypingUsers(users: string[]) {
       setTypingUsers(users);
@@ -66,24 +68,41 @@ const useSocketEvents = ({
       socket.off("new_message", getMessage);
       socket.off("typing_users", getTypingUsers);
     };
-  }, [id, dispatch]);
+  }, [id, dispatch, currentConversationId]);
+
+  useEffect(() => {
+    if (conversationId) {
+      socket.emit("join_conversation", conversationId);
+      console.log("Joined conversation:", conversationId);
+    }
+
+    // return () => {
+    //   if (conversationId) {
+    //     socket.emit("leave_conversation", conversationId);
+    //     console.log("Left conversation:", conversationId);
+    //   }
+    // };
+  }, [conversationId]);
 
   const emitTyping = useMemo(
     () =>
       debounce(
-        () =>
-          socket.emit("typing", { userId: id, participantIds, conversationId }),
+        () => socket.emit("typing", { userId: id, conversationId }),
         300
       ),
-    [id, participantIds, conversationId]
+    [id, conversationId]
   );
   const emitStopTyping = useMemo(
     () =>
       debounce(
-        () => socket.emit("stop_typing", { userId: id, participantIds, conversationId }),
+        () =>
+          socket.emit("stop_typing", {
+            userId: id,
+            conversationId,
+          }),
         2000
       ),
-    [id, participantIds, conversationId]
+    [id, conversationId]
   );
   useEffect(() => {
     return () => {

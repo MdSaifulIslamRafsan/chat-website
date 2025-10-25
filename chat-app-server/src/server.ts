@@ -38,45 +38,43 @@ io.on("connection", (socket) => {
     socket.join(id);
     io.emit("update_online_users", Array.from(onlineUsers.keys()));
   });
-  socket.on(
-    "typing",
-    ({ userId, participantIds, conversationId }: TtypingEvent) => {
-     console.log({ userId, participantIds, conversationId })
-      if (!conversationId) return;
+  socket.on("join_conversation", (conversationId) => {
+    socket.join(conversationId);
+    console.log(`User joined conversation: ${conversationId}`);
+  });
+  // socket.on("leave_conversation", (conversationId) => {
+  //   socket.leave(conversationId);
+  //   console.log(`User left conversation: ${conversationId}`);
+  // });
+  socket.on("typing", ({ userId, conversationId }: TtypingEvent) => {
+    if (!conversationId) return;
 
-      if (!typingUsersMap.has(conversationId)) {
-        typingUsersMap.set(conversationId, new Set());
-      }
+    if (!typingUsersMap.has(conversationId)) {
+      typingUsersMap.set(conversationId, new Set());
+    }
 
+    const set = typingUsersMap.get(conversationId)!;
+    set.add(userId);
+
+    const typingUsers = Array.from(set);
+
+    io.to(conversationId).emit("typing_users", typingUsers);
+  });
+  socket.on("stop_typing", ({ userId, conversationId }: TtypingEvent) => {
+    if (!conversationId) return;
+
+    if (typingUsersMap.has(conversationId)) {
       const set = typingUsersMap.get(conversationId)!;
-      set.add(userId);
-
-      const typingUsers = Array.from(set);
-      participantIds?.forEach((pid) => {
-        io.to(pid).emit("typing_users", typingUsers);
-      });
+      set.delete(userId);
+      if (set.size === 0) typingUsersMap.delete(conversationId);
     }
-  );
-  socket.on(
-    "stop_typing",
-    ({ userId, participantIds, conversationId }: TtypingEvent) => {
-      if (!conversationId) return;
 
-      if (typingUsersMap.has(conversationId)) {
-        const set = typingUsersMap.get(conversationId)!;
-        set.delete(userId);
-        if (set.size === 0) typingUsersMap.delete(conversationId);
-      }
+    const typingUsers = typingUsersMap.has(conversationId)
+      ? Array.from(typingUsersMap.get(conversationId)!)
+      : [];
 
-      const typingUsers = typingUsersMap.has(conversationId)
-        ? Array.from(typingUsersMap.get(conversationId)!)
-        : [];
-
-      participantIds?.forEach((pid) => {
-        io.to(pid).emit("typing_users", typingUsers);
-      });
-    }
-  );
+    io.to(conversationId).emit("typing_users", typingUsers);
+  });
   socket.on("disconnect", async () => {
     console.log("❌ A user disconnected:", socket.id);
     const id = socket.userId;
@@ -85,6 +83,9 @@ io.on("connection", (socket) => {
     const userSockets = onlineUsers.get(id);
     if (userSockets) {
       userSockets.delete(socket.id);
+
+      await new Promise((res) => setTimeout(res, 50));
+
       if (userSockets.size === 0) {
         onlineUsers.delete(id);
         await User.findByIdAndUpdate(id, {

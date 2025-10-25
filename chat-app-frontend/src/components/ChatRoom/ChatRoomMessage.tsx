@@ -20,7 +20,10 @@ const ChatRoomMessage = ({
   const dispatch = useAppDispatch();
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   console.log("Typing users in ChatRoomMessage:", typingUsers);
-  const { data, isLoading } = useGetMessagesQuery(conversationId);
+  const { data, isLoading } = useGetMessagesQuery(conversationId, {
+  refetchOnMountOrArgChange: true,
+});
+  console.log(data);
   const messages = useAppSelector((state) => state.message.messages);
   const { currentConversation } = useCurrentConversation(
     conversationId as string

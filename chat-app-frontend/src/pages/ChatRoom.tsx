@@ -4,24 +4,13 @@ import ChatRoomInputBox from "../components/ChatRoom/ChatRoomInputBox";
 import ChatRoomMessage from "../components/ChatRoom/ChatRoomMessage";
 import { useAppSelector } from "../redux/hooks";
 import useSocketEvents from "../hooks/useSocketEvents";
-import { useMemo } from "react";
 
 const ChatRoom = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { id } = useParams();
-  const conversations = useAppSelector(
-    (state) => state.conversation.conversations
-  );
-
-  const conversation = conversations?.find((conv) => conv?._id === id);
-  const participantIds = useMemo(
-    () => conversation?.participants?.map((p) => p._id) ?? [],
-    [conversation]
-  );
 
   const { emitTyping, emitStopTyping, typingUsers } = useSocketEvents({
     id: user?.id as string,
-    participantIds: participantIds,
     conversationId: id as string,
   });
 

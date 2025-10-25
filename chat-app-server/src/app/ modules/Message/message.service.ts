@@ -9,15 +9,18 @@ const createMessageIntoDB = async (messageData: TMessage) => {
     { path: "sender", select: "name avatar" },
     { path: "conversationId", select: "participants" },
   ]);
+  io.to(messageData?.conversationId.toString()).emit(
+    "new_message",
+    populatedMessage
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const participants = (populatedMessage?.conversationId as any)?.participants;
-  if (Array.isArray(participants)) {
-    participants.forEach((userId) => {
-      io.to(userId.toString()).emit("new_message", populatedMessage);
-    });
-  }
-
+  // const participants = (populatedMessage?.conversationId as any)?.participants;
+  // if (Array.isArray(participants)) {
+  //   participants.forEach((userId) => {
+  //     io.to(userId.toString()).emit("new_message", populatedMessage);
+  //   });
+  // }
 
   return newMessage;
 };
