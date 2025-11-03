@@ -7,7 +7,6 @@ export interface TParticipant {
   lastSeen?: string;
 }
 
-
 export interface TConversation {
   _id: string;
   isGroup: boolean;
@@ -17,7 +16,11 @@ export interface TConversation {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-  lastMessage?: string;
+  lastMessage?: {
+    text: string;
+    sender: TParticipant;
+    createdAt: string;
+  };
   unreadCount?: number;
   groupName?: string;
 }

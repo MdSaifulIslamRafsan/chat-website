@@ -11,8 +11,8 @@ export const conversationApi = baseApi.injectEndpoints({
       // invalidatesTags: ["Message"],
     }),
     getMessages: builder.query({
-      query: (conversationId) => ({
-        url: `/message/${conversationId}`,
+      query: ({ conversationId, page, limit }) => ({
+        url: `/message/${conversationId}?page=${page}&limit=${limit}`,
         method: "GET",
       }),
       providesTags: ["Message"],

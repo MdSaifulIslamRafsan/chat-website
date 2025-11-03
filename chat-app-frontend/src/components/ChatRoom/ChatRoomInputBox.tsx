@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { Paperclip, Send, Smile } from "lucide-react";
+import {  Send, Smile } from "lucide-react";
 
 import CForm from "../form/CForm";
 import CTextarea from "../form/CTextarea";
@@ -16,13 +16,11 @@ import { useCreateMessageMutation } from "../../redux/features/message/messageAp
 const ChatRoomInputBox = ({
   id,
   conversationId,
-  emitTyping,
-  emitStopTyping,
+  // emitTyping,
+  // emitStopTyping,
 }: {
   id: string;
   conversationId: string;
-  emitTyping?: (event?: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  emitStopTyping?: (event?: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -48,9 +46,9 @@ const ChatRoomInputBox = ({
 
   return (
     <div className="border-t border-border p-4 flex items-center gap-2 bg-background sticky bottom-0">
-      <Button variant="ghost" size="icon" type="button">
+      {/* <Button variant="ghost" size="icon" type="button">
         <Paperclip className="h-5 w-5" />
-      </Button>
+      </Button> */}
 
       <CForm
         styles="flex flex-1 items-center gap-2"
@@ -59,8 +57,6 @@ const ChatRoomInputBox = ({
       >
         <div className="flex-1 relative w-full">
           <CTextarea
-            emitTyping={emitTyping}
-            emitStopTyping={emitStopTyping}
             fieldName="message"
             placeholder="Write a message..."
           />

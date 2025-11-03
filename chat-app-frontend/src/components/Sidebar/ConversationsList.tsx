@@ -8,7 +8,10 @@ import { useGetConversationQuery } from "../../redux/features/Conversation/conve
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { cn } from "../../lib/utils";
-import { setConversations } from "../../redux/features/Conversation/conversationSlice";
+import {
+  resetUnreadCount,
+  setConversations,
+} from "../../redux/features/Conversation/conversationSlice";
 import { getGroupDisplayName } from "../../utils/helperFunction";
 import ConversationsListSkeleton from "../Skeleton/ConversationsListSkeleton";
 
@@ -35,9 +38,14 @@ const ConversationsList = ({
     }
   }, [data, dispatch]);
 
-  const handleUserClick = useCallback(() => {
-    dispatch(showOnlyChat());
-  }, [dispatch]);
+  const handleUserClick = useCallback(
+    (conversationId?: string) => {
+      if (!conversationId) return;
+      dispatch(showOnlyChat());
+      dispatch(resetUnreadCount(conversationId));
+    },
+    [dispatch]
+  );
 
   if (isLoading) {
     return <ConversationsListSkeleton></ConversationsListSkeleton>;
@@ -49,7 +57,6 @@ const ConversationsList = ({
           No conversations yet
         </div>
       ) : (
-        
         conversations.map((conv: TConversation) => {
           if (conv?.isGroup) {
             const groupDisplayName = getGroupDisplayName(conv, id as string);
@@ -58,9 +65,9 @@ const ConversationsList = ({
               <Link
                 to={`/${conv?._id}`}
                 key={conv?._id}
-                onClick={handleUserClick}
+                onClick={() => handleUserClick(conv?._id)}
                 className={`flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted transition ${
-                  params.id === conv._id ? "bg-secondary" : ""
+                  params?.id === conv?._id ? "bg-secondary" : ""
                 }`}
               >
                 <div className="flex gap-3 items-center">
@@ -71,8 +78,8 @@ const ConversationsList = ({
                   <div className="flex flex-col">
                     <p className="font-semibold">{groupDisplayName}</p>
                     <p className="text-sm text-muted-foreground line-clamp-1">
-                      {conv?.lastMessage ||
-                        `Group with ${conv.participants.length} members`}
+                      {conv?.lastMessage?.text ||
+                        `Group with ${conv?.participants?.length} members`}
                     </p>
                   </div>
                 </div>
@@ -87,7 +94,7 @@ const ConversationsList = ({
 
           // For one-on-one chats
           const otherUser = conv?.participants?.find(
-            (participant) => participant._id !== id
+            (participant) => participant?._id !== id
           );
 
           if (!otherUser) {
@@ -99,9 +106,9 @@ const ConversationsList = ({
             <Link
               to={`/${conv?._id}`}
               key={conv?._id}
-              onClick={handleUserClick}
+              onClick={() => handleUserClick(conv?._id)}
               className={`flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted transition ${
-                params.id === conv._id ? "bg-secondary" : ""
+                params?.id === conv?._id ? "bg-secondary" : ""
               }`}
             >
               <div className="flex items-center gap-3">
@@ -133,7 +140,7 @@ const ConversationsList = ({
                     {otherUser?.name || "Unknown User"}
                   </p>
                   <p className="text-sm text-muted-foreground line-clamp-1">
-                    {conv?.lastMessage || "Start a conversation"}
+                    {conv?.lastMessage?.text || "Start a conversation"}
                   </p>
                 </div>
               </div>

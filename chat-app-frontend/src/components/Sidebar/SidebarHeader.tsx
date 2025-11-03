@@ -21,20 +21,19 @@ import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useTheme } from "../../utils/useTheme";
 import { showOnlyChat } from "../../redux/features/layoutSlice";
-import { cn } from "../../lib/utils";
+
 import { socket } from "../../utils/socket";
+import { cn } from "../../lib/utils";
 interface SidebarHeaderProps {
   setOpenGroupModal: React.Dispatch<React.SetStateAction<boolean>>;
   setOpenUserModal: React.Dispatch<React.SetStateAction<boolean>>;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
-  isConnected: boolean;
 }
 
 const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   setOpenGroupModal,
   setOpenUserModal,
   setSearchTerm,
-  isConnected,
 }) => {
   const { showSidebar } = useAppSelector((state) => state.layout);
   const { theme, setTheme } = useTheme();
@@ -44,6 +43,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({
     dispatch(logout());
     toast.success("logout successfully");
   };
+  const { isConnected } = useAppSelector((state) => state.auth);
 
   const handelSingleUserModal = () => {
     setOpenUserModal(true);

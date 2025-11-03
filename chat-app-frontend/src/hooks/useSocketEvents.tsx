@@ -1,12 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef } from "react";
 import { socket } from "../utils/socket";
 import type { TConversation } from "../Types/conversationTypes";
 import { useAppDispatch } from "../redux/hooks";
-import { addConversation } from "../redux/features/Conversation/conversationSlice";
+import {
+  addConversation,
+  incrementUnreadCount,
+  setOnlineUsers,
+} from "../redux/features/Conversation/conversationSlice";
 import type { TMessage } from "../Types/MessageTypes";
-import { addMessage } from "../redux/features/message/messageSlice";
-import { debounce } from "lodash";
+import { addMessage, setTypingUsers } from "../redux/features/message/messageSlice";
+
 import { useParams } from "react-router-dom";
+import { setIsConnected } from "../redux/features/auth/authSlice";
 
 const useSocketEvents = ({
   id,
@@ -18,22 +23,22 @@ const useSocketEvents = ({
   const dispatch = useAppDispatch();
   const { id: currentConversationId } = useParams();
 
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const [isUsersConnected, setIsUsersConnected] = useState<string[]>([]);
-  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const currentConvIdRef = useRef<string | undefined>(currentConversationId);
+  useEffect(() => {
+    currentConvIdRef.current = currentConversationId;
+  }, [currentConversationId]);
 
   useEffect(() => {
     function onConnect() {
       socket.emit("userId", id);
-      setIsConnected(true);
+      dispatch(setIsConnected(true));
     }
 
     function onDisconnect() {
-      setIsConnected(false);
+      dispatch(setIsConnected(false));
     }
     function getOnlineUser(onlineUsers: string[]) {
-      console.log("Currently online:", onlineUsers);
-      setIsUsersConnected(onlineUsers);
+      dispatch(setOnlineUsers(onlineUsers));
     }
 
     function getConversation(newConversation: TConversation) {
@@ -41,12 +46,23 @@ const useSocketEvents = ({
     }
 
     function getMessage(message: TMessage) {
-      if (message.conversationId._id === currentConversationId) {
+      const msgConvId =
+        typeof message.conversationId === "string"
+          ? message.conversationId
+          : message.conversationId?._id;
+
+      const currentConvId = currentConvIdRef.current;
+
+      if (msgConvId && msgConvId !== currentConvId) {
+        console.log("count");
+        dispatch(incrementUnreadCount(msgConvId));
+      } else {
         dispatch(addMessage(message));
       }
     }
+
     function getTypingUsers(users: string[]) {
-      setTypingUsers(users);
+      dispatch(setTypingUsers(users));
     }
 
     socket.on("connect", onConnect);
@@ -68,55 +84,16 @@ const useSocketEvents = ({
       socket.off("new_message", getMessage);
       socket.off("typing_users", getTypingUsers);
     };
-  }, [id, dispatch, currentConversationId]);
+  }, [id, dispatch]);
 
   useEffect(() => {
     if (conversationId) {
       socket.emit("join_conversation", conversationId);
-      console.log("Joined conversation:", conversationId);
     }
-
-    // return () => {
-    //   if (conversationId) {
-    //     socket.emit("leave_conversation", conversationId);
-    //     console.log("Left conversation:", conversationId);
-    //   }
-    // };
   }, [conversationId]);
 
-  const emitTyping = useMemo(
-    () =>
-      debounce(
-        () => socket.emit("typing", { userId: id, conversationId }),
-        300
-      ),
-    [id, conversationId]
-  );
-  const emitStopTyping = useMemo(
-    () =>
-      debounce(
-        () =>
-          socket.emit("stop_typing", {
-            userId: id,
-            conversationId,
-          }),
-        2000
-      ),
-    [id, conversationId]
-  );
-  useEffect(() => {
-    return () => {
-      emitTyping.cancel?.();
-      emitStopTyping.cancel?.();
-    };
-  }, [emitTyping, emitStopTyping]);
-  return {
-    isConnected,
-    isUsersConnected,
-    typingUsers,
-    emitTyping,
-    emitStopTyping,
-  };
+
+  
 };
 
 export default useSocketEvents;

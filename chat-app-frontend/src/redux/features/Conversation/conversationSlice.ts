@@ -1,12 +1,15 @@
-
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { TConversation } from "../../../Types/conversationTypes";
 
 interface ConversationState {
   conversations: TConversation[];
+  onlineUsers: string[];
 }
 
-const initialState: ConversationState = { conversations: [] };
+const initialState: ConversationState = {
+  conversations: [],
+  onlineUsers: [],
+};
 
 const conversationSlice = createSlice({
   name: "conversation",
@@ -21,8 +24,26 @@ const conversationSlice = createSlice({
       );
       if (!exists) state.conversations.unshift(action.payload);
     },
+    incrementUnreadCount(state, action: PayloadAction<string>) {
+      const conv = state.conversations.find((c) => c._id === action.payload);
+      if (conv) console.log("unread count", conv.unreadCount);
+      if (conv) conv.unreadCount = (conv.unreadCount || 0) + 1;
+    },
+    resetUnreadCount(state, action: PayloadAction<string>) {
+      const conv = state.conversations.find((c) => c._id === action.payload);
+      if (conv) conv.unreadCount = 0;
+    },
+    setOnlineUsers(state, action: PayloadAction<string[]>) {
+      state.onlineUsers = action.payload;
+    },
   },
 });
 
-export const { setConversations, addConversation } = conversationSlice.actions;
+export const {
+  setConversations,
+  addConversation,
+  incrementUnreadCount,
+  resetUnreadCount,
+  setOnlineUsers,
+} = conversationSlice.actions;
 export default conversationSlice.reducer;

@@ -8,16 +8,42 @@ import {
   FormMessage,
 } from "../ui/form";
 import type { TCTextarea } from "../../Types/CTextareaTypes";
+import { useEffect, useMemo } from "react";
+import { debounce } from "lodash";
+import { socket } from "../../utils/socket";
+import { useParams } from "react-router-dom";
+import { useAppSelector } from "../../redux/hooks";
 
-const CTextarea = ({
-  fieldName,
-  label,
-  placeholder,
-  required,
-  emitTyping,
-  emitStopTyping,
-}: TCTextarea) => {
+const CTextarea = ({ fieldName, label, placeholder, required }: TCTextarea) => {
   const { control } = useFormContext();
+  const { id: conversationId } = useParams();
+  const { user } = useAppSelector((state) => state.auth);
+  const emitTyping = useMemo(
+    () =>
+      debounce(
+        () => socket.emit("typing", { userId: user?.id, conversationId }),
+        300
+      ),
+    [user?.id, conversationId]
+  );
+  const emitStopTyping = useMemo(
+    () =>
+      debounce(
+        () =>
+          socket.emit("stop_typing", {
+            userId: user?.id,
+            conversationId,
+          }),
+        2000
+      ),
+    [conversationId, user?.id]
+  );
+  useEffect(() => {
+    return () => {
+      emitTyping.cancel?.();
+      emitStopTyping.cancel?.();
+    };
+  }, [emitTyping, emitStopTyping]);
 
   // const textareaRef = useRef<HTMLTextAreaElement>(null);
 

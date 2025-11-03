@@ -17,15 +17,14 @@ import type { createConversationUserTypes } from "../../Types/createConversation
 import { toast } from "sonner";
 import type { TErrorMessage } from "../../Types/errorMessageTypes";
 
-import useSocketEvents from "../../hooks/useSocketEvents";
 import ConversationsList from "./ConversationsList";
 import { Input } from "../ui/input";
 
 const Sidebar = () => {
   const { user } = useAppSelector((state) => state.auth);
-  const { isConnected, isUsersConnected } = useSocketEvents({
-    id: user?.id as string,
-  });
+
+  const { onlineUsers } = useAppSelector((state) => state.conversation);
+
   const [groupName, setGroupName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const {
@@ -110,7 +109,6 @@ const Sidebar = () => {
     <div className="w-full min-h-[calc(100vh-4rem)] h-full border-r border-border flex flex-col">
       {/* Header */}
       <SidebarHeader
-        isConnected={isConnected}
         setOpenGroupModal={setOpenGroupModal}
         setOpenUserModal={setOpenUserModal}
         setSearchTerm={setSearchTerm}
@@ -120,7 +118,7 @@ const Sidebar = () => {
 
       <ConversationsList
         id={user?.id as string}
-        isUsersConnected={isUsersConnected}
+        isUsersConnected={onlineUsers}
       ></ConversationsList>
 
       <Modal
@@ -177,7 +175,7 @@ const Sidebar = () => {
             </div>
 
             {selectedGroupUsers.length > 0 &&
-              userForSingleConversation?.data?.length > 0 && (
+              filteredForSingleUsers.length > 0 && (
                 <div className="mt-4 flex justify-end">
                   <Button onClick={handleCreateChat}>
                     {createConversationLoading ? "Loading" : "Start Chat"}
@@ -191,75 +189,78 @@ const Sidebar = () => {
       {/*  Single Chat Modal */}
 
       {/* Group Chat Modal */}
-      {loadingForGroupConversation ? (
-        "loading"
-      ) : (
-        <Modal
-          title="Create a Group Chat"
-          description="Select multiple users to start a group chat"
-          open={openGroupModal}
-          onOpenChange={setOpenGroupModal}
-        >
-          <div className="space-y-2 mb-3">
-            <Input
-              placeholder="Search users..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2 mb-3">
-            <label className="text-sm  font-medium">Group Name</label>
-            <Input
-              className="mt-1"
-              placeholder="Enter group name..."
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-            />
-          </div>
 
-          <div className="space-y-2 max-h-[300px] custom-scrollbar overflow-y-auto">
-            {filteredForGroupUsers?.length > 0 ? (
-              filteredForGroupUsers?.map(
-                (user: createConversationUserTypes) => (
-                  <div
-                    key={user?._id}
-                    onClick={() => toggleGroupUser(user?._id)}
-                    className={cn(
-                      "flex items-center gap-3 p-2 rounded-xl border cursor-pointer transition",
-                      selectedGroupUsers.includes(user?._id)
-                        ? "bg-primary/10 border-primary"
-                        : "hover:bg-muted border-transparent"
-                    )}
-                  >
-                    <Avatar>
-                      <AvatarImage src={user?.avatar} />
-                      <AvatarFallback>
-                        {user?.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{user?.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {user?.email}
-                      </p>
+      <Modal
+        title="Create a Group Chat"
+        description="Select multiple users to start a group chat"
+        open={openGroupModal}
+        onOpenChange={setOpenGroupModal}
+      >
+        {loadingForGroupConversation ? (
+          "loading"
+        ) : (
+          <div className="">
+            <div className="space-y-2 mb-2">
+              <Input
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2 mb-3">
+              <label className="text-sm  font-medium">Group Name</label>
+              <Input
+                className="mt-1"
+                placeholder="Enter group name..."
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2 max-h-[200px] custom-scrollbar overflow-y-auto">
+              {filteredForGroupUsers?.length > 0 ? (
+                filteredForGroupUsers?.map(
+                  (user: createConversationUserTypes) => (
+                    <div
+                      key={user?._id}
+                      onClick={() => toggleGroupUser(user?._id)}
+                      className={cn(
+                        "flex items-center gap-3 p-2 rounded-xl border cursor-pointer transition",
+                        selectedGroupUsers.includes(user?._id)
+                          ? "bg-primary/10 border-primary"
+                          : "hover:bg-muted border-transparent"
+                      )}
+                    >
+                      <Avatar>
+                        <AvatarImage src={user?.avatar} />
+                        <AvatarFallback>
+                          {user?.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{user?.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {user?.email}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )
                 )
-              )
-            ) : (
-              <p className=" text-muted-foreground text-center py-4">
-                No users found to start a group conversation.
-              </p>
+              ) : (
+                <p className=" text-muted-foreground text-center py-4">
+                  No users found to start a group conversation.
+                </p>
+              )}
+            </div>
+
+            {selectedGroupUsers.length > 0 && (
+              <div className="mt-4 flex justify-end">
+                <Button onClick={handleCreateGroup}>Create Group</Button>
+              </div>
             )}
           </div>
-
-          {selectedGroupUsers.length > 0 && (
-            <div className="mt-4 flex justify-end">
-              <Button onClick={handleCreateGroup}>Create Group</Button>
-            </div>
-          )}
-        </Modal>
-      )}
+        )}
+      </Modal>
     </div>
   );
 };

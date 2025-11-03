@@ -1,12 +1,11 @@
 import { Button } from "../ui/button";
-import { ArrowLeft, Phone, Video } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { showOnlySidebar } from "../../redux/features/layoutSlice";
 import { useParams } from "react-router-dom";
 import { getGroupDisplayName } from "../../utils/helperFunction";
 import type { TConversation } from "../../Types/conversationTypes";
-import useSocketEvents from "../../hooks/useSocketEvents";
 import formatLastSeen from "../../utils/formatLastSeen";
 import { cn } from "../../lib/utils";
 import useCurrentConversation from "../../hooks/useCurrentConversation";
@@ -14,9 +13,10 @@ import useCurrentConversation from "../../hooks/useCurrentConversation";
 const ChatRoomHeader = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { isUsersConnected } = useSocketEvents({ id: user?.id as string });
+  const { onlineUsers } = useAppSelector((state) => state.conversation);
+
   const { id } = useParams();
- const { currentConversation } = useCurrentConversation(id as string);
+  const { currentConversation } = useCurrentConversation(id as string);
   const handleUserClick = () => {
     dispatch(showOnlySidebar());
   };
@@ -54,7 +54,7 @@ const ChatRoomHeader = () => {
           <span
             className={cn(
               "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background",
-              isUsersConnected.includes(otherUser?._id as string)
+              onlineUsers.includes(otherUser?._id as string)
                 ? "bg-green-500"
                 : "bg-gray-400"
             )}
@@ -68,20 +68,20 @@ const ChatRoomHeader = () => {
           <p className="text-xs md:text-sm text-muted-foreground">
             {currentConversation?.isGroup
               ? "Online"
-              : isUsersConnected?.includes(otherUser?._id as string)
+              : onlineUsers?.includes(otherUser?._id as string)
               ? "online"
               : formatLastSeen(otherUser?.lastSeen as string)}
           </p>
         </div>
       </div>
-      <div className="flex gap-2 items-center">
+      {/* <div className="flex gap-2 items-center">
         <Button size="icon" variant="ghost">
           <Phone className="h-5 w-5"></Phone>
         </Button>
         <Button size="icon" variant="ghost">
           <Video className="h-5 w-5"></Video>
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 };
