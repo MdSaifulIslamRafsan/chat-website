@@ -38,7 +38,10 @@ io.on("connection", (socket) => {
     socket.join(id);
     io.emit("update_online_users", Array.from(onlineUsers.keys()));
   });
-  socket.on("join_conversation", (conversationId) => {
+  socket.on("join_conversation", async (conversationId) => {
+    if (!conversationId || typeof conversationId !== 'string') {
+      return socket.emit("error", "Invalid conversation ID");
+    }
     socket.join(conversationId);
     console.log(`User joined conversation: ${conversationId}`);
   });
@@ -46,8 +49,10 @@ io.on("connection", (socket) => {
   //   socket.leave(conversationId);
   //   console.log(`User left conversation: ${conversationId}`);
   // });
-  socket.on("typing", ({ userId, conversationId }: TtypingEvent) => {
+  socket.on("typing", ({ conversationId }: TtypingEvent) => {
     if (!conversationId) return;
+    const userId = socket.userId;
+    if (!userId) return;
 
     if (!typingUsersMap.has(conversationId)) {
       typingUsersMap.set(conversationId, new Set());
@@ -78,6 +83,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", async () => {
     console.log("❌ A user disconnected:", socket.id);
     const id = socket.userId;
+    console.log({id})
     if (!id) return;
 
     const userSockets = onlineUsers.get(id);

@@ -4,7 +4,6 @@ import sendResponse from "../../utils/sendResponse";
 import httpStatus from "http-status";
 import { messageService } from "./message.service";
 
-
 const createMessage = catchAsync(async (req, res) => {
   const result = await messageService.createMessageIntoDB(req.body);
 
@@ -18,9 +17,12 @@ const createMessage = catchAsync(async (req, res) => {
 
 const getMessagesByConversationId = catchAsync(async (req, res) => {
   const { conversationId } = req.params;
+  const { page, limit } = req.query;
 
   const messages = await messageService.getMessagesIntoDB(
-    conversationId
+    conversationId,
+    Number(page),
+    Number(limit)
   );
 
   sendResponse(res, {
@@ -33,5 +35,5 @@ const getMessagesByConversationId = catchAsync(async (req, res) => {
 
 export const messageController = {
   createMessage,
-  getMessagesByConversationId
+  getMessagesByConversationId,
 };
