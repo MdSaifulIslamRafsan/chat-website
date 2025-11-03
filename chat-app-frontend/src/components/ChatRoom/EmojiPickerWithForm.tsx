@@ -55,7 +55,7 @@ const EmojiPickerWithForm = ({
     const handleClickOutside = (event: MouseEvent) => {
       const emojiPicker = document.querySelector(".EmojiPickerReact");
       const emojiButton = document.querySelector("[data-emoji-button]");
-      console.log({ emojiPicker, emojiButton });
+
       if (
         showEmojiPicker &&
         emojiPicker &&

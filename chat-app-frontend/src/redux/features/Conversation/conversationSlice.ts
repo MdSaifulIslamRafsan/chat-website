@@ -26,7 +26,7 @@ const conversationSlice = createSlice({
     },
     incrementUnreadCount(state, action: PayloadAction<string>) {
       const conv = state.conversations.find((c) => c._id === action.payload);
-      if (conv) console.log("unread count", conv.unreadCount);
+
       if (conv) conv.unreadCount = (conv.unreadCount || 0) + 1;
     },
     resetUnreadCount(state, action: PayloadAction<string>) {

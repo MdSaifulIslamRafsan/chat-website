@@ -24,6 +24,8 @@ import { showOnlyChat } from "../../redux/features/layoutSlice";
 
 import { socket } from "../../utils/socket";
 import { cn } from "../../lib/utils";
+import { useLogoutMutation } from "../../redux/features/auth/authApi";
+import type { TErrorMessage } from "../../Types/errorMessageTypes";
 interface SidebarHeaderProps {
   setOpenGroupModal: React.Dispatch<React.SetStateAction<boolean>>;
   setOpenUserModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -38,10 +40,16 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   const { showSidebar } = useAppSelector((state) => state.layout);
   const { theme, setTheme } = useTheme();
   const dispatch = useAppDispatch();
-  const handleLogout = () => {
-    socket.disconnect();
-    dispatch(logout());
-    toast.success("logout successfully");
+  const [removeRefreshToken] = useLogoutMutation();
+  const handleLogout = async () => {
+    try {
+      await removeRefreshToken({}).unwrap();
+      dispatch(logout());
+      socket.disconnect();
+      toast.success("Logout successful");
+    } catch (error) {
+      toast.error((error as TErrorMessage).message || "Logout failed");
+    }
   };
   const { isConnected } = useAppSelector((state) => state.auth);
 

@@ -54,7 +54,7 @@ const useSocketEvents = ({
       const currentConvId = currentConvIdRef.current;
 
       if (msgConvId && msgConvId !== currentConvId) {
-        console.log("count");
+        
         dispatch(incrementUnreadCount(msgConvId));
       } else {
         dispatch(addMessage(message));

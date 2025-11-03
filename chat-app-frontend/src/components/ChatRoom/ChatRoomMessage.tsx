@@ -52,7 +52,7 @@ const ChatRoomMessage = ({
         setTimeout(() => {
           if (containerRef.current)
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
-        }, 2000);
+        }, 0);
       } else {
         const container = containerRef.current;
         if (!container) return;

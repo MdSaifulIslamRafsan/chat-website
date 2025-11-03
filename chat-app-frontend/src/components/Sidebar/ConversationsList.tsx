@@ -98,7 +98,7 @@ const ConversationsList = ({
           );
 
           if (!otherUser) {
-            console.warn("Other user not found in conversation:", conv?._id);
+           
             return null;
           }
 
