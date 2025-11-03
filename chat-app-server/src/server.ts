@@ -43,7 +43,7 @@ io.on("connection", (socket) => {
       return socket.emit("error", "Invalid conversation ID");
     }
     socket.join(conversationId);
-    console.log(`User joined conversation: ${conversationId}`);
+    // console.log(`User joined conversation: ${conversationId}`);
   });
   // socket.on("leave_conversation", (conversationId) => {
   //   socket.leave(conversationId);
@@ -83,7 +83,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", async () => {
     console.log("❌ A user disconnected:", socket.id);
     const id = socket.userId;
-    console.log({id})
+    // console.log({id})
     if (!id) return;
 
     const userSockets = onlineUsers.get(id);

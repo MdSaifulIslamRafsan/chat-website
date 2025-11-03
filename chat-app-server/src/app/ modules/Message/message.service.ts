@@ -5,6 +5,7 @@ import { Message } from "./message.model";
 import { io } from "../../../server";
 import { Conversation } from "../Conversation/conversation.model";
 import AppError from "../../errors/AppError";
+import mongoose from "mongoose";
 
 const createMessageIntoDB = async (messageData: TMessage) => {
   const newMessage = await Message.create(messageData);
@@ -44,17 +45,41 @@ const getMessagesIntoDB = async (
   page: number,
   limit: number
 ) => {
-  if (!conversationId) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Conversation ID is required");
-  }
   const skip = (page - 1) * limit;
 
-  const messages = await Message.find({ conversationId })
-    .populate("sender", "name avatar")
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
-  return messages.reverse();
+  const start = Date.now();
+  const messages = await Message.aggregate([
+    {
+      $match: {
+        conversationId: new mongoose.Types.ObjectId(conversationId),
+      },
+    },
+    { $sort: { createdAt: 1 } },
+    { $skip: skip },
+    { $limit: limit },
+    {
+      $project: {
+        text: 1,
+        createdAt: 1,
+        sender: 1,
+        _id: 1,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "sender",
+        foreignField: "_id",
+        as: "sender",
+        pipeline: [{ $project: { name: 1, avatar: 1, _id: 0 } }],
+      },
+    },
+    { $unwind: "$sender" },
+  ]);
+  const end = Date.now();
+
+  console.log("Query execution time:", end - start, "ms");
+  return messages;
 };
 
 export const messageService = {
