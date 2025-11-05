@@ -8,9 +8,12 @@ const loginUserValidation = z.object({
 });
 
 const refreshTokenValidation = z.object({
+  body: z.object({
   cookies: z.object({
     refreshToken: z.string().nonempty("Refresh Token is required"),
   }),
+  }),
+    
 });
 
 export const AuthValidation = {
