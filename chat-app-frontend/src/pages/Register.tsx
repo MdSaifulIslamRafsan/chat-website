@@ -20,14 +20,14 @@ const image_hosting_key = import.meta.env.VITE_IMAGE_HOSTING_KEY;
 const image_hosting_api = `https://api.imgbb.com/1/upload?key=${image_hosting_key}`;
 
 const Register = () => {
-  console.log(image_hosting_key);
+ 
   const navigate = useNavigate();
   const [register, { isLoading }] = useRegisterMutation();
 const onSubmit: SubmitHandler<FieldValues> = async (data) => {
   const toastId = toast.loading("Registering...");
 
   try {
-    // Check if avatar is a File object
+    
     if (!(data.avatar instanceof File)) {
       throw new Error("Please select a valid image file");
     }
@@ -35,7 +35,7 @@ const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     const formData = new FormData();
     formData.append("image", data.avatar);
 
-    console.log("Uploading file:", data.avatar.name, data.avatar.type);
+    
 
     const uploadResponse = await fetch(image_hosting_api, {
       method: "POST",
@@ -43,7 +43,7 @@ const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     });
 
     const imgData = await uploadResponse.json();
-    console.log("Image upload response:", imgData);
+   
 
     if (!imgData.success) {
       throw new Error(imgData.error?.message || "Image upload failed");
