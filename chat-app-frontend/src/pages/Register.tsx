@@ -23,51 +23,59 @@ const Register = () => {
   console.log(image_hosting_key);
   const navigate = useNavigate();
   const [register, { isLoading }] = useRegisterMutation();
-  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    const toastId = toast.loading("registering...");
+const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+  const toastId = toast.loading("Registering...");
 
-    try {
-      
-      // create FormData and append the file from the "avatar" field (CInput uses fieldName="avatar")
-      const formData = new FormData();
-      const file = data?.avatar[0];
-      if (!file) {
-        throw new Error("No image file provided");
-      }
-      formData.append("image", file);
-      console.log("uploading file:", file, data?.avatar);
-      const uploadResponse = await fetch(image_hosting_api, {
-        method: "POST",
-        body: formData,
-      });
-      const imgData = await uploadResponse.json();
+  try {
+    // Check if avatar is a File object
+    if (!(data.avatar instanceof File)) {
+      throw new Error("Please select a valid image file");
+    }
 
-      if (!imgData.success) {
-        throw new Error("Image upload failed");
-      }
+    const formData = new FormData();
+    formData.append("image", data.avatar);
 
-      const photoUrl = imgData.data.display_url;
+    console.log("Uploading file:", data.avatar.name, data.avatar.type);
 
-      const userPayload = {
-        ...data,
-        avatar: photoUrl,
-      };
-      const res = await register(userPayload).unwrap();
+    const uploadResponse = await fetch(image_hosting_api, {
+      method: "POST",
+      body: formData,
+    });
 
-      if (res?.success) {
-        toast.success(res?.message, {
-          id: toastId,
-          duration: 2000,
-        });
-        navigate(`/login`);
-      }
-    } catch (error: unknown) {
-      toast.error((error as TErrorMessage).message || `something went wrong`, {
+    const imgData = await uploadResponse.json();
+    console.log("Image upload response:", imgData);
+
+    if (!imgData.success) {
+      throw new Error(imgData.error?.message || "Image upload failed");
+    }
+
+    const photoUrl = imgData.data.display_url;
+
+    const userPayload = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      gender: data.gender,
+      avatar: photoUrl,
+    };
+
+    const res = await register(userPayload).unwrap();
+
+    if (res?.success) {
+      toast.success(res?.message, {
         id: toastId,
         duration: 2000,
       });
+      navigate(`/login`);
     }
-  };
+  } catch (error: unknown) {
+    console.error("Registration error:", error);
+    toast.error((error as TErrorMessage).message || `Something went wrong`, {
+      id: toastId,
+      duration: 2000,
+    });
+  }
+};
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-muted/10">

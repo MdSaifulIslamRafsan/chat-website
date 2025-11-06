@@ -20,9 +20,17 @@ const CInput = ({
   placeholder,
   required,
 }: TCInput) => {
-  const { control } = useFormContext();
+  const { control, setValue } = useFormContext();
   const [showPassword, setShowPassword] = useState(false);
   const inputType = type === "password" && showPassword ? "text" : type;
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setValue(fieldName, file);
+    }
+  };
+
   return (
     <FormField
       control={control}
@@ -41,7 +49,13 @@ const CInput = ({
                 id={fieldName}
                 type={inputType}
                 placeholder={placeholder}
-                className={cn("pr-10", type=="file" ? "pb-0 h-10" : "py-5")}
+                className={cn("pr-10", type === "file" ? "pb-0 h-10" : "py-5")}
+                value={type === "file" ? undefined : field.value} // Don't set value for file inputs
+                onChange={
+                  type === "file" 
+                    ? handleFileChange 
+                    : field.onChange
+                }
               />
               {type === "password" && (
                 <button
@@ -61,7 +75,7 @@ const CInput = ({
           <FormMessage />
         </FormItem>
       )}
-    ></FormField>
+    />
   );
 };
 
