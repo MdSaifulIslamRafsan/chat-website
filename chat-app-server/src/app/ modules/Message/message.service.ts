@@ -54,7 +54,7 @@ const getMessagesIntoDB = async (
         conversationId: new mongoose.Types.ObjectId(conversationId),
       },
     },
-    { $sort: { createdAt: 1 } },
+    { $sort: { createdAt: -1 } },
     { $skip: skip },
     { $limit: limit },
     {
