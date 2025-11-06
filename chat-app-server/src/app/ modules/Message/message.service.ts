@@ -71,7 +71,7 @@ const getMessagesIntoDB = async (
         localField: "sender",
         foreignField: "_id",
         as: "sender",
-        pipeline: [{ $project: { name: 1, avatar: 1, _id: 0 } }],
+        pipeline: [{ $project: { name: 1, avatar: 1, _id: 1 } }],
       },
     },
     { $unwind: "$sender" },
