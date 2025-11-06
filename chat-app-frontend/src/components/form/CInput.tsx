@@ -11,6 +11,7 @@ import {
 import { useFormContext } from "react-hook-form";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { cn } from "../../lib/utils";
 
 const CInput = ({
   type = "text",
@@ -40,7 +41,7 @@ const CInput = ({
                 id={fieldName}
                 type={inputType}
                 placeholder={placeholder}
-                className="pr-10 py-5"
+                className={cn("pr-10", type=="file" ? "pb-0 h-10" : "py-5")}
               />
               {type === "password" && (
                 <button

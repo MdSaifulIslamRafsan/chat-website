@@ -57,7 +57,7 @@ const Login = () => {
           <CForm
             styles="space-y-4"
             onSubmit={onSubmit}
-            defaultValues={{ email: "", password: "" }}
+            defaultValues={{ email: "demo@gmail.com", password: "Pa$$w0rd!" }}
             resolver={loginSchema}
           >
             <CInput

@@ -16,15 +16,44 @@ import { registerSchema } from "../Schema/registerSchema";
 import { toast } from "sonner";
 import type { TErrorMessage } from "../Types/errorMessageTypes";
 import { useRegisterMutation } from "../redux/features/register/registerApi";
+const image_hosting_key = import.meta.env.VITE_IMAGE_HOSTING_KEY;
+const image_hosting_api = `https://api.imgbb.com/1/upload?key=${image_hosting_key}`;
 
 const Register = () => {
+  console.log(image_hosting_key);
   const navigate = useNavigate();
   const [register, { isLoading }] = useRegisterMutation();
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     const toastId = toast.loading("registering...");
+
     try {
-      const res = await register(data).unwrap();
-    
+      
+      // create FormData and append the file from the "avatar" field (CInput uses fieldName="avatar")
+      const formData = new FormData();
+      const file = data?.avatar[0];
+      if (!file) {
+        throw new Error("No image file provided");
+      }
+      formData.append("image", file);
+      console.log("uploading file:", file, data?.avatar);
+      const uploadResponse = await fetch(image_hosting_api, {
+        method: "POST",
+        body: formData,
+      });
+      const imgData = await uploadResponse.json();
+
+      if (!imgData.success) {
+        throw new Error("Image upload failed");
+      }
+
+      const photoUrl = imgData.data.display_url;
+
+      const userPayload = {
+        ...data,
+        avatar: photoUrl,
+      };
+      const res = await register(userPayload).unwrap();
+
       if (res?.success) {
         toast.success(res?.message, {
           id: toastId,
@@ -69,8 +98,7 @@ const Register = () => {
             <CInput
               fieldName="avatar"
               label="Image"
-              placeholder="Enter your image url"
-              type="text"
+              type="file"
               required
             ></CInput>
             <CSelect

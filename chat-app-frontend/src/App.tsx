@@ -6,8 +6,9 @@ import useSocketEvents from "./hooks/useSocketEvents";
 const App = () => {
   const { showSidebar } = useAppSelector((state) => state.layout);
   const { user } = useAppSelector((state) => state.auth);
+
   useSocketEvents({ id: user?.id as string });
-  
+
   return (
     <div className="p-5">
       <div className="container flex border-2 border-border rounded-2xl  mx-auto">

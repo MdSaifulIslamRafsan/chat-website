@@ -8,28 +8,26 @@ import {
   setOnlineUsers,
 } from "../redux/features/Conversation/conversationSlice";
 import type { TMessage } from "../Types/MessageTypes";
-import { addMessage, setTypingUsers } from "../redux/features/message/messageSlice";
+import {
+  addMessage,
+  setTypingUsers,
+} from "../redux/features/message/messageSlice";
 
 import { useParams } from "react-router-dom";
 import { setIsConnected } from "../redux/features/auth/authSlice";
 
-const useSocketEvents = ({
-  id,
-  conversationId,
-}: {
-  id: string;
-  conversationId?: string;
-}) => {
+const useSocketEvents = ({ id }: { id: string }) => {
   const dispatch = useAppDispatch();
-  const { id: currentConversationId } = useParams();
+  const { id: conversationId } = useParams();
 
-  const currentConvIdRef = useRef<string | undefined>(currentConversationId);
+  const currentConvIdRef = useRef<string | undefined>(conversationId);
   useEffect(() => {
-    currentConvIdRef.current = currentConversationId;
-  }, [currentConversationId]);
+    currentConvIdRef.current = conversationId;
+  }, [conversationId]);
 
   useEffect(() => {
     function onConnect() {
+
       socket.emit("userId", id);
       dispatch(setIsConnected(true));
     }
@@ -46,6 +44,7 @@ const useSocketEvents = ({
     }
 
     function getMessage(message: TMessage) {
+      console.log(message);
       const msgConvId =
         typeof message.conversationId === "string"
           ? message.conversationId
@@ -54,7 +53,6 @@ const useSocketEvents = ({
       const currentConvId = currentConvIdRef.current;
 
       if (msgConvId && msgConvId !== currentConvId) {
-        
         dispatch(incrementUnreadCount(msgConvId));
       } else {
         dispatch(addMessage(message));
@@ -91,9 +89,6 @@ const useSocketEvents = ({
       socket.emit("join_conversation", conversationId);
     }
   }, [conversationId]);
-
-
-  
 };
 
 export default useSocketEvents;

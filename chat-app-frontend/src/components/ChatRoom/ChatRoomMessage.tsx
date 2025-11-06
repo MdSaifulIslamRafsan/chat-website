@@ -28,11 +28,13 @@ const ChatRoomMessage = ({
     { conversationId, page, limit },
     {
       refetchOnMountOrArgChange: true,
-      skip: !conversationId,
+      skip: !conversationId || !id,
     }
   );
 
   const messages = useAppSelector((state) => state.message.messages);
+
+  console.log(messages, id);
   const prevCountRef = useRef(messages.length);
   const { currentConversation } = useCurrentConversation(
     conversationId as string
@@ -111,79 +113,80 @@ const ChatRoomMessage = ({
           Loading older messages...
         </p>
       )}
-      {messages.map((msg, index) => {
-        const currentDateLabel = FormateDate(msg.createdAt);
-        const showDateLabel = currentDateLabel !== lastDateLabel;
-        if (showDateLabel) lastDateLabel = currentDateLabel;
-        return (
-          <div key={msg?._id} className="">
-            {showDateLabel && (
-              <p className="text-center text-sm font-semibold text-muted-foreground">
-                {currentDateLabel}
-              </p>
-            )}
-            <div
-              className={cn(
-                "flex flex-col max-w-[80%]",
-                msg?.sender?._id === id
-                  ? "ml-auto items-end"
-                  : "mr-auto items-start"
+      {messages.length > 0 &&
+        messages?.map((msg, index) => {
+          const currentDateLabel = FormateDate(msg.createdAt);
+          const showDateLabel = currentDateLabel !== lastDateLabel;
+          if (showDateLabel) lastDateLabel = currentDateLabel;
+          return (
+            <div key={msg?._id} className="">
+              {showDateLabel && (
+                <p className="text-center text-sm font-semibold text-muted-foreground">
+                  {currentDateLabel}
+                </p>
               )}
-            >
               <div
                 className={cn(
-                  "flex items-center gap-2",
-                  msg?.sender?._id === id ? "flex-row-reverse" : "flex-row"
+                  "flex flex-col max-w-[80%]",
+                  msg?.sender?._id === id
+                    ? "ml-auto items-end"
+                    : "mr-auto items-start"
                 )}
               >
-                <Avatar>
-                  <AvatarImage src={msg?.sender?.avatar} />
-                  <AvatarFallback>
-                    {msg?.sender?.name?.slice(0, 1)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="">
-                  <p
-                    className={cn(
-                      "text-xs text-muted-foreground mt-2",
-                      msg?.sender?._id === id
-                        ? "text-right mr-2"
-                        : "text-left ml-2"
-                    )}
-                  >
-                    {" "}
-                    {msg?.sender?.name?.split(" ")[0]}
-                  </p>
-                  <div
-                    className={cn(
-                      "rounded-2xl px-4 py-2 text-sm shadow-sm whitespace-pre-line",
-                      msg?.sender?._id === id
-                        ? "bg-primary text-primary-foreground rounded-tr-none"
-                        : "bg-muted text-foreground rounded-tl-none"
-                    )}
-                  >
-                    {msg.text}
+                <div
+                  className={cn(
+                    "flex items-center gap-2",
+                    msg?.sender?._id === id ? "flex-row-reverse" : "flex-row"
+                  )}
+                >
+                  <Avatar>
+                    <AvatarImage src={msg?.sender?.avatar} />
+                    <AvatarFallback>
+                      {msg?.sender?.name?.slice(0, 1)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="">
+                    <p
+                      className={cn(
+                        "text-xs text-muted-foreground mt-2",
+                        msg?.sender?._id === id
+                          ? "text-right mr-2"
+                          : "text-left ml-2"
+                      )}
+                    >
+                      {" "}
+                      {msg?.sender?.name?.split(" ")[0]}
+                    </p>
+                    <div
+                      className={cn(
+                        "rounded-2xl px-4 py-2 text-sm shadow-sm whitespace-pre-line",
+                        msg?.sender?._id === id
+                          ? "bg-primary text-primary-foreground rounded-tr-none"
+                          : "bg-muted text-foreground rounded-tl-none"
+                      )}
+                    >
+                      {msg.text}
+                    </div>
+                    <p
+                      className={cn(
+                        "text-xs text-muted-foreground mt-2",
+                        msg?.sender?._id === id
+                          ? "text-right mr-2"
+                          : "text-left ml-2"
+                      )}
+                    >
+                      {new Date(msg?.createdAt).toLocaleString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
                   </div>
-                  <p
-                    className={cn(
-                      "text-xs text-muted-foreground mt-2",
-                      msg?.sender?._id === id
-                        ? "text-right mr-2"
-                        : "text-left ml-2"
-                    )}
-                  >
-                    {new Date(msg?.createdAt).toLocaleString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
                 </div>
               </div>
+              {index === messages?.length - 1 && <div ref={messagesEndRef} />}
             </div>
-            {index === messages?.length - 1 && <div ref={messagesEndRef} />}
-          </div>
-        );
-      })}
+          );
+        })}
       {/* 🟢 Typing indicator */}
       {typingUsersInfo && typingUsersInfo?.length > 0 && (
         <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground animate-pulse">
