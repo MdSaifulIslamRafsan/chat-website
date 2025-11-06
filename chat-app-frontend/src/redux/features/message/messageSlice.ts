@@ -13,7 +13,7 @@ const messageSlice = createSlice({
   initialState,
   reducers: {
     setMessages(state, action: PayloadAction<TMessage[]>) {
-      state.messages = action.payload;
+      state.messages = action.payload.reverse();
     },
     addMessage(state, action: PayloadAction<TMessage>) {
       const exists = state.messages.find((c) => c._id === action.payload._id);
@@ -24,7 +24,7 @@ const messageSlice = createSlice({
       const newMessages = action.payload.filter(
         (msg) => !existingIds.has(msg._id)
       );
-      state.messages = [...newMessages, ...state.messages];
+      state.messages = [...newMessages.reverse(), ...state.messages];
     },
     setTypingUsers(state, action: PayloadAction<string[]>) {
       state.typingUsers = action.payload;
