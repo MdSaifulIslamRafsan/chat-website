@@ -11,7 +11,7 @@ const loginUser = catchAsync(async (req, res) => {
   res.cookie("refreshToken", refreshToken, {
     secure: (config.NODE_ENV as string) === "production",
     httpOnly: true,
-    sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+    sameSite: true,
     maxAge: 1000 * 60 * 60 * 24 * 365,
   });
 
@@ -39,7 +39,7 @@ const userLogout = catchAsync(async (req, res) => {
     path: "/",
     httpOnly: true,
     secure: (config.NODE_ENV as string) === "production",
-    sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+    sameSite: true,
   });
 
   sendResponse(res, {
